@@ -5,7 +5,10 @@ import datetime
 
 import requests
 
+from django.http import HttpResponse
 from django.shortcuts import render
+from django.views.generic import View
+
 
 from rest_framework import status
 from rest_framework.views import APIView
@@ -268,8 +271,6 @@ class BotWebHookHandler(APIView):
                     else:
                         sendBotMessage(contributor.social_identifier, "Looks like we can't find any stories right now. Send \"\\start\" to start one!")
                     
-                    
-                    
                 elif KEYWORD_HELP in message_text:
                     sendHelpMessage( contributor )
                 else:
@@ -278,3 +279,22 @@ class BotWebHookHandler(APIView):
 
            
         return Response( status=status.HTTP_200_OK )
+
+
+
+class HomePageView(View):
+    def get(self, request):
+        # pick a random story and render it
+        story = Story.objects.filter(complete=True).order_by('?').first()
+        
+        context = {
+            "story": story,
+            "fragments": []
+        }
+        
+        if story:
+            story_fragments = Fragment.objects.filter(story=story).order_by('position')                
+            
+            context["fragments"] = story_fragments
+        
+        return render(request, 'stories/stories.html', context)

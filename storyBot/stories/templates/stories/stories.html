@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% for fragment in fragments %}
+    <h3> {% if fragment.position == 0 %} 
+            Begining
+         {% elif fragment.position == 1 %} 
+            Middle
+         {% else %}
+            End
+         {% endif %}
+        by {{ fragment.alias }}</h3>
+    <p>{{ fragment.fragment }}</p>
+{% endfor %}
+
+{% endblock %}
