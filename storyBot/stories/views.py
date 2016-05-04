@@ -108,7 +108,7 @@ class BotWebHookHandler(APIView):
         """
 
         messenger_events = request.data.get('entry')[0].get('messaging')
-
+        
         for event in messenger_events:
     
             contributor, created = Contributor.objects.get_or_create(social_identifier=str( event.get('sender').get('id') ) )
@@ -278,7 +278,10 @@ class BotWebHookHandler(APIView):
                     sendBotMessage(contributor.social_identifier, "Sorry, I didn't get that :( Here are some tips!")
                     sendHelpMessage( contributor )
 
-           
+            # else:
+            #     sendBotMessage(contributor.social_identifier, "Sorry, I don't understand images")
+        
+        
         return Response( status=status.HTTP_200_OK )
 
 
