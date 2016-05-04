@@ -72,3 +72,8 @@ body{
 .about p{
     text-align: center;
 }
+
+.messege-us-btn-container{
+    display: block;
+    height: 21px;   
+}
