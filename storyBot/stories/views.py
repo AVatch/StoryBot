@@ -21,7 +21,8 @@ from .alias_generator import generate_alias
 FB_WEBHOOK_CHALLENGE = os.environ.get("FB_WEBHOOK_CHALLENGE")
 FB_TOKEN = os.environ.get("FB_TOKEN")
 FB_URL = os.environ.get("FB_URL")
-
+FB_APP_ID = os.environ.get("FB_APP_ID")
+FB_PAGE_ID = os.environ.get("FB_PAGE_ID")
 
 KEYWORD_START = '\start'
 KEYWORD_CONTINUE = '\continue'
@@ -289,8 +290,12 @@ class HomePageView(View):
         
         context = {
             "story": story,
-            "fragments": []
+            "fragments": [],
+            "FB_APP_ID": FB_APP_ID,
+            "FB_PAGE_ID": FB_PAGE_ID
         }
+        
+        print context 
         
         if story:
             story_fragments = Fragment.objects.filter(story=story).order_by('position')                

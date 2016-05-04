@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="flex-container">
+
+<div class="v-flex-container">
     <div class="story">
         <h2>Story Title</h2>
         {% for fragment in fragments %}
@@ -16,5 +17,29 @@
             <p>{{ fragment.fragment }}</p>
         {% endfor %}
     </div>
+    
+    <div class="about">
+        
+        <p>This is an experiment in crowd sourced story telling</p>
+        <div class="h-flex-container">
+            <div class="fb-messengermessageus" 
+                messenger_app_id="{{ FB_APP_ID }}"
+                page_id="{{ FB_PAGE_ID }}"
+                color="blue"
+                size="xlarge" ></div>
+        </div>
+            
+        <p>
+            <a href="https://twitter.com/AVatchinsky" target="_blank">@AVatchinsky</a>
+        </p>
+        
+    </div>
+    
 </div>
+
+
+
+
+
+
 {% endblock %}

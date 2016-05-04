@@ -9,9 +9,17 @@ body{
     min-height: 100vh;
 }
 
-.flex-container{
+.v-flex-container{
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.h-flex-container{
+    display: flex;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
 }
@@ -48,4 +56,12 @@ body{
     font-size: 21px;
     line-height: 1.58;
     letter-spacing: -.003em;
+}
+
+
+.about{
+    padding: 30px;
+}
+.about p{
+    text-align: center;
 }
