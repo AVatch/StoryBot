@@ -10,7 +10,6 @@ body{
 }
 
 .v-flex-container{
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -22,6 +21,13 @@ body{
     flex-direction: row;
     align-items: center;
     justify-content: center;
+}
+
+.flex-start{
+    align-self: flex-start;
+}
+.flex-end{
+    align-self: flex-end;
 }
 
 .story{
@@ -61,6 +67,7 @@ body{
 
 .about{
     padding: 30px;
+    width: 100%;
 }
 .about p{
     text-align: center;

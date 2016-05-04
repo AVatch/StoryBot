@@ -3,22 +3,9 @@
 {% block content %}
 
 <div class="v-flex-container">
-    <div class="story">
-        <h2>Story Title</h2>
-        {% for fragment in fragments %}
-            <h4> {% if fragment.position == 0 %} 
-                    Begining
-                {% elif fragment.position == 1 %} 
-                    Middle
-                {% else %}
-                    End
-                {% endif %}
-                by {{ fragment.alias }}</h4>
-            <p>{{ fragment.fragment }}</p>
-        {% endfor %}
-    </div>
     
-    <div class="about">
+
+    <div class="flex-start about">
         
         <p>This is an experiment in crowd sourced story telling</p>
         <div class="h-flex-container">
@@ -34,6 +21,25 @@
         </p>
         
     </div>
+    
+    
+    
+    <div class="story">
+        <h2>Story Title</h2>
+        {% for fragment in fragments %}
+            <h4> {% if fragment.position == 0 %} 
+                    Begining
+                {% elif fragment.position == 1 %} 
+                    Middle
+                {% else %}
+                    End
+                {% endif %}
+                by {{ fragment.alias }}</h4>
+            <p>{{ fragment.fragment }}</p>
+        {% endfor %}
+    </div>
+    
+    
     
 </div>
 
