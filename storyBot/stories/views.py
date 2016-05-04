@@ -6,7 +6,7 @@ import datetime
 import requests
 
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views.generic import View
 
 
@@ -298,7 +298,25 @@ class HomePageView(View):
             "FB_PAGE_ID": FB_PAGE_ID
         }
         
-        print context 
+        if story:
+            story_fragments = Fragment.objects.filter(story=story).order_by('position')                
+            
+            context["fragments"] = story_fragments
+        
+        return render(request, 'stories/stories.html', context)
+
+
+class StoryDetailView(View):
+    def get(self, request, pk):
+        
+        story = get_object_or_404(Story, pk=pk)
+        
+        context = {
+            "story": story,
+            "fragments": [],
+            "FB_APP_ID": FB_APP_ID,
+            "FB_PAGE_ID": FB_PAGE_ID
+        }
         
         if story:
             story_fragments = Fragment.objects.filter(story=story).order_by('position')                
@@ -306,3 +324,4 @@ class HomePageView(View):
             context["fragments"] = story_fragments
         
         return render(request, 'stories/stories.html', context)
+
