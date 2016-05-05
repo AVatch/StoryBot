@@ -148,10 +148,9 @@ class BotWebHookHandler(APIView):
             
             if created:
                 sendBotMessage(contributor.social_identifier, "Thanks for joining StoryBot! Here are some tips.")
-                sendHelpMessage( contributor )
                 break  # we want to let the user input a choice
-                
-                
+            
+            print event
             
             if event.get('message') and event.get('message').get('text'):
                 """Handle messages with text
@@ -340,7 +339,9 @@ class BotWebHookHandler(APIView):
                     """Handle the case that we hanvt thought about 
                     """
                     sendBotMessage(contributor.social_identifier, "Sorry, I didn't get that :( Here are some tips!")
-                    sendHelpMessage( contributor )
+        
+            elif event.get('message') and event.get('message').get('attachments'):
+                sendBotMessage( contributor.social_identifier, "Thanks for the pic ;)" )
                     
         """Return a 200 to the messenger provider 
         """
