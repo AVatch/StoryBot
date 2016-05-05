@@ -5,8 +5,7 @@ from django.db import models
 
 class Story(models.Model):
     complete = models.BooleanField(default=False)
-    fragment_count = models.IntegerField(default=0)
-
+    title = models.CharField(max_length=100, default="An amazing story in search of a title")
     time_created = models.DateTimeField(auto_now_add=True)
     time_modified = models.DateTimeField(auto_now=True)
     
@@ -27,9 +26,7 @@ class Contributor(models.Model):
     writing -> user is writing a fragment
     """
     state = models.CharField(max_length=20, default="browsing")
-    focused_fragment = models.IntegerField(null=True)
-    
-    
+
     time_created = models.DateTimeField(auto_now_add=True)
     time_modified = models.DateTimeField(auto_now=True)
     
