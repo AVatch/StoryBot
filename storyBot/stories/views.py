@@ -150,10 +150,14 @@ class BotWebHookHandler(APIView):
                 break  # we want to let the user input a choice
             
             
+            """Handle messages with text
+            """
             if event.get('message') and event.get('message').get('text'):
         
                 message_text = event.get('message').get('text')
-
+                
+                """Handle the case that the user is attempting to start a new story 
+                """
                 if KEYWORD_START in message_text.lower():
                     # first let's check to make sure the user is not currently working on a Story
                     # a user can only work on one story at a time.
@@ -186,7 +190,8 @@ class BotWebHookHandler(APIView):
                             # all stories are complete, so we should create a new one
                             createStory( contributor )
 
-
+                """Handle the case that the user is attempting to finish a story fragment 
+                """
                 elif KEYWORD_DONE in message_text.lower():
                     # the user should only have one incomplete fragment at a time, so 
                     # let's get it and update it
@@ -216,7 +221,8 @@ class BotWebHookHandler(APIView):
                             for fragment in story_fragments:
                                 sendBotMessage( fragment.contributor.social_identifier, "One of your stories is complete! Respond with \\read " + str(story.id) + " to see it" )
                         
-                
+                """Handle the case that the user is attempting to read a specific story 
+                """
                 elif KEYWORD_READ in message_text.lower():
                     # check if the message also had an id for the story
                     if hasNumber(message_text):
@@ -234,7 +240,8 @@ class BotWebHookHandler(APIView):
                         sendBotMessage( contributor.social_identifier, "This is the last story you worked on" )
                         readBackStory(contributor, story)
                     
-                    
+                """Handle the case that the user is attempting to continue a story 
+                """ 
                 elif KEYWORD_CONTINUE in message_text.lower() or contributor.state == 'writing':
                     if KEYWORD_CONTINUE in message_text.lower():
                         # If the user just says \continue we should read back the story
@@ -261,7 +268,9 @@ class BotWebHookHandler(APIView):
                             fragment.fragment = fragment.fragment + " " + message_text
                             fragment.save()
                             sendBotMessage(contributor.social_identifier, "Adding that to your part of the story, \"\\done\" to finish.")
-
+                
+                """Handle the case that the user is attempting to see a history of their writing 
+                """
                 elif KEYWORD_HISTORY in message_text.lower():
                     sendBotMessage(contributor.social_identifier, "Here is a history of your stories. Send \"\\read <story id>\" to read a story")
                     
@@ -273,7 +282,9 @@ class BotWebHookHandler(APIView):
                     for story in stories:
                         complete = "COMPLETE" if story.complete else "INCOMPLETE"
                         sendBotMessage(contributor.social_identifier,  "["+complete+"] Story id: " + str(story.id))    
-                    
+                
+                """Handle the case that the user is attempting to read a random story 
+                """
                 elif KEYWORD_BROWSE in message_text.lower():
                     contributor.state = 'browsing'
                     contributor.save()
@@ -286,17 +297,19 @@ class BotWebHookHandler(APIView):
                         readBackStory(contributor, story)
                     else:
                         sendBotMessage(contributor.social_identifier, "Looks like we can't find any stories right now. Send \"\\start\" to start one!")
-                    
+                
+                """Handle the case that the user is attempting to get help 
+                """
                 elif KEYWORD_HELP in message_text.lower():
                     sendHelpMessage( contributor )
+                """Handle the case that we hanvt thought about 
+                """
                 else:
                     sendBotMessage(contributor.social_identifier, "Sorry, I didn't get that :( Here are some tips!")
                     sendHelpMessage( contributor )
 
-            # else:
-            #     sendBotMessage(contributor.social_identifier, "Sorry, I don't understand images")
-        
-        
+        """Return a 200 to the messenger provider 
+        """
         return Response( status=status.HTTP_200_OK )
 
 
