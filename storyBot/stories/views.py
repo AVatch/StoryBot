@@ -30,6 +30,7 @@ KEYWORD_READ = '\\read'
 KEYWORD_ERASE = '\erase'
 KEYWORD_DONE = '\done'
 KEYWORD_DISCARD = '\discard'
+KEYWORD_LEAVE = '\leave'
 
 KEYWORD_BROWSE = '\\browse'
 
@@ -245,6 +246,30 @@ class BotWebHookHandler(APIView):
                         sendBotMessage( contributor.social_identifier, "This is the last story you worked on" )
                         readBackStory(contributor, story)
                         
+                elif KEYWORD_DISCARD in message_text.lower():
+                    """Handle the case that the user is attempting to discard his fragment 
+                    """
+                    fragment = Fragment.objects.filter(contributor=contributor).filter(complete=False).first()
+                    if fragment:
+                        # erase the contents of the fragment
+                        fragment.fragment = ""
+                        fragment.save()
+                        sendBotMessage(contributor.social_identifier,  "Your story fragment has been erased, you can start writing it again")
+                        sendBotMessage(contributor.social_identifier,  "Here is the story so far")
+                        readBackStory(contributor, fragment.story)
+                    else:
+                        sendBotMessage(contributor.social_identifier,  "You have no story drafts to discard")
+                
+                elif KEYWORD_LEAVE in message_text.lower():
+                    """Handle the case that the user is attempting to leave the story
+                    """
+                    fragment = Fragment.objects.filter(contributor=contributor).filter(complete=False).first()
+                    if fragment:
+                        # erase the contents of the fragment
+                        fragment.destroy()
+                        sendBotMessage(contributor.social_identifier,  "Your story fragment has been erased, and you have left the story. Send \"\start\" to join a new story")
+                    else:
+                        sendBotMessage(contributor.social_identifier,  "You have no story drafts to discard")
                 
                 elif KEYWORD_CONTINUE in message_text.lower() or contributor.state == 'writing':
                     """Handle the case that the user is attempting to continue a story 
@@ -290,23 +315,6 @@ class BotWebHookHandler(APIView):
                         complete = "COMPLETE" if story.complete else "INCOMPLETE"
                         sendBotMessage(contributor.social_identifier,  "["+complete+"] Story id: " + str(story.id))    
                         
-                
-                elif KEYWORD_DISCARD in message_text.lower():
-                    """Handle the case that the user is attempting to discard his fragment 
-                    """
-                    fragment = Fragment.objects.filter(contributor=contributor).filter(complete=False).first()
-                    if fragment:
-                        # erase the contents of the fragment
-                        fragment.fragment = ""
-                        fragment.save()
-                        sendBotMessage(contributor.social_identifier,  "Your story fragment has been erased, you can start writing it again")
-                        sendBotMessage(contributor.social_identifier,  "Here is the story so far")
-                        readBackStory(contributor, fragment.story)
-                    else:
-                        sendBotMessage(contributor.social_identifier,  "You have no story drafts to discard")
-                        
-                        
-                
                 elif KEYWORD_BROWSE in message_text.lower():
                     """Handle the case that the user is attempting to read a random story 
                     """
