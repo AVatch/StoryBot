@@ -29,6 +29,7 @@ KEYWORD_CONTINUE = '\continue'
 KEYWORD_READ = '\\read'
 KEYWORD_ERASE = '\erase'
 KEYWORD_DONE = '\done'
+KEYWORD_DISCARD = '\discard'
 
 KEYWORD_BROWSE = '\\browse'
 
@@ -148,25 +149,27 @@ class BotWebHookHandler(APIView):
                 sendBotMessage(contributor.social_identifier, "Thanks for joining StoryBot! Here are some tips.")
                 sendHelpMessage( contributor )
                 break  # we want to let the user input a choice
+                
+                
             
-            
-            """Handle messages with text
-            """
             if event.get('message') and event.get('message').get('text'):
-        
+                """Handle messages with text
+                """
+                
                 message_text = event.get('message').get('text')
                 
-                """Handle the case that the user is attempting to start a new story 
-                """
+                
                 if KEYWORD_START in message_text.lower():
+                    """Handle the case that the user is attempting to start a new story 
+                    """
                     # first let's check to make sure the user is not currently working on a Story
                     # a user can only work on one story at a time.
                     if Fragment.objects.filter(contributor=contributor).filter(complete=False).count() > 0:
                         sendBotMessage(contributor.social_identifier, "Looks like you are already writing a story. Finish that first, or discard it to start a new one")
-                
+                        
                     else:
                         sendBotMessage(contributor.social_identifier, "Great, let's find a story for you to join!")
-
+                        
                         if Story.objects.filter(complete=False).count() > 0:
                             # there are some stories that are not complete 
                             stories = Story.objects.filter(complete=False).order_by('time_created')
@@ -189,10 +192,11 @@ class BotWebHookHandler(APIView):
                         else:
                             # all stories are complete, so we should create a new one
                             createStory( contributor )
-
-                """Handle the case that the user is attempting to finish a story fragment 
-                """
+                            
+                
                 elif KEYWORD_DONE in message_text.lower():
+                    """Handle the case that the user is attempting to finish a story fragment 
+                    """
                     # the user should only have one incomplete fragment at a time, so 
                     # let's get it and update it
                     fragment = contributor.fragment_set.all().filter(complete=False).first()
@@ -203,7 +207,7 @@ class BotWebHookHandler(APIView):
                         # Mark the contributor specific fragment done
                         fragment.complete = True
                         fragment.save()
-                    
+                        
                         # Update the contributor state
                         contributor.state = "browsing"
                         contributor.save()
@@ -220,10 +224,11 @@ class BotWebHookHandler(APIView):
                             # Notify the contributors the story is done and send them a message with it
                             for fragment in story_fragments:
                                 sendBotMessage( fragment.contributor.social_identifier, "One of your stories is complete! Respond with \\read " + str(story.id) + " to see it" )
-                        
-                """Handle the case that the user is attempting to read a specific story 
-                """
+                                
+                
                 elif KEYWORD_READ in message_text.lower():
+                    """Handle the case that the user is attempting to read a specific story 
+                    """
                     # check if the message also had an id for the story
                     if hasNumber(message_text):
                         try:
@@ -232,17 +237,18 @@ class BotWebHookHandler(APIView):
                             readBackStory( contributor, story )
                         except Exception as e:
                             sendBotMessage( contributor.social_identifier, "Sorry we could not find that story" )
-                        
+                            
                     else:
                         # if not, read back the story the user is working on
                         fragment = contributor.fragment_set.all().order_by('time_created').last()
                         story = fragment.story
                         sendBotMessage( contributor.social_identifier, "This is the last story you worked on" )
                         readBackStory(contributor, story)
-                    
-                """Handle the case that the user is attempting to continue a story 
-                """ 
+                        
+                
                 elif KEYWORD_CONTINUE in message_text.lower() or contributor.state == 'writing':
+                    """Handle the case that the user is attempting to continue a story 
+                    """ 
                     if KEYWORD_CONTINUE in message_text.lower():
                         # If the user just says \continue we should read back the story
                         # to them to remind them where they are at.
@@ -256,11 +262,11 @@ class BotWebHookHandler(APIView):
                             readBackStory(contributor, story)
                         else:
                             sendBotMessage(contributor.social_identifier, "It doesn't seem you are working on a story. Send \"\start\" to join a new story")
-
+                            
                     else:
                         # the user is just inputing text, while in the 'writing' state
                         # so let's add it to the focused fragment
-                    
+                        
                         # the user should only have one incomplete fragment at a time, so 
                         # let's get it and update it
                         fragment = contributor.fragment_set.all().filter(complete=False).first()
@@ -268,46 +274,66 @@ class BotWebHookHandler(APIView):
                             fragment.fragment = fragment.fragment + " " + message_text
                             fragment.save()
                             sendBotMessage(contributor.social_identifier, "Adding that to your part of the story, \"\\done\" to finish.")
+                            
                 
-                """Handle the case that the user is attempting to see a history of their writing 
-                """
                 elif KEYWORD_HISTORY in message_text.lower():
+                    """Handle the case that the user is attempting to see a history of their writing 
+                    """
                     sendBotMessage(contributor.social_identifier, "Here is a history of your stories. Send \"\\read <story id>\" to read a story")
                     
                     fragments = Fragment.objects.filter(contributor=contributor).order_by('time_created')
                     stories = []
                     for fragment in fragments:
                         stories.append( fragment.story )
-                    
+                        
                     for story in stories:
                         complete = "COMPLETE" if story.complete else "INCOMPLETE"
                         sendBotMessage(contributor.social_identifier,  "["+complete+"] Story id: " + str(story.id))    
+                        
                 
-                """Handle the case that the user is attempting to read a random story 
-                """
+                elif KEYWORD_DISCARD in message_text.lower():
+                    """Handle the case that the user is attempting to discard his fragment 
+                    """
+                    fragment = Fragment.objects.filter(contributor=contributor).filter(complete=False).first()
+                    if fragment:
+                        # erase the contents of the fragment
+                        fragment.fragment = ""
+                        fragment.save()
+                        sendBotMessage(contributor.social_identifier,  "Your story fragment has been erased, you can start writing it again")
+                        sendBotMessage(contributor.social_identifier,  "Here is the story so far")
+                        readBackStory(contributor, fragment.story)
+                    else:
+                        sendBotMessage(contributor.social_identifier,  "You have no story drafts to discard")
+                        
+                        
+                
                 elif KEYWORD_BROWSE in message_text.lower():
+                    """Handle the case that the user is attempting to read a random story 
+                    """
                     contributor.state = 'browsing'
                     contributor.save()
-
+                    
                     # get a random story
                     story = Story.objects.order_by('?').first()
-
+                    
                     if story:
                         sendBotMessage(contributor.social_identifier, "Here is a random story")
                         readBackStory(contributor, story)
                     else:
                         sendBotMessage(contributor.social_identifier, "Looks like we can't find any stories right now. Send \"\\start\" to start one!")
+                        
                 
-                """Handle the case that the user is attempting to get help 
-                """
                 elif KEYWORD_HELP in message_text.lower():
+                    """Handle the case that the user is attempting to get help 
+                    """
                     sendHelpMessage( contributor )
-                """Handle the case that we hanvt thought about 
-                """
+                
                 else:
+                    """Handle the case that we hanvt thought about 
+                    """
                     sendBotMessage(contributor.social_identifier, "Sorry, I didn't get that :( Here are some tips!")
                     sendHelpMessage( contributor )
-
+                    
         """Return a 200 to the messenger provider 
         """
         return Response( status=status.HTTP_200_OK )
