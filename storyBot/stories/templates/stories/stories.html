@@ -2,10 +2,10 @@
 
 {% block content %}
 
-<div class="v-flex-container">
+<div class="vertical-center">
     
-
-    <div class="flex-start about">
+    
+    <div class="about">
         
         <p>This is an experiment in crowd sourced story telling</p>
         <p>
@@ -13,7 +13,7 @@
         </p>
         
         <div class="messege-us-btn-container animated rubberBand">
-        <div class="h-flex-container">
+        <div class="horizontal-center">
             <div class="fb-messengermessageus" 
                 messenger_app_id="{{ FB_APP_ID }}"
                 page_id="{{ FB_PAGE_ID }}"
@@ -25,17 +25,21 @@
     </div>
         
     <div class="story">
-        <h2>Story Title</h2>
+        <h2>{{ story.title }}</h2>
         {% for fragment in fragments %}
-            <h4> {% if fragment.position == 0 %} 
-                    Begining
-                {% elif fragment.position == 1 %} 
-                    Middle
-                {% else %}
-                    End
-                {% endif %}
-                by {{ fragment.alias }}</h4>
-            <p>{{ fragment.fragment }}</p>
+            <div class="fragment">
+                <h4> {% if fragment.position == 0 %} 
+                        Begining
+                    {% elif fragment.position == 1 %} 
+                        Middle
+                    {% else %}
+                        End
+                    {% endif %}
+                    by {{ fragment.alias }}</h4>
+                
+                <p>{{ fragment.fragment }}</p>
+            </div>
+            
         {% endfor %}
     </div>
     
