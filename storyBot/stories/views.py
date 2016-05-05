@@ -123,7 +123,8 @@ def joinStory(contributor, story):
     sendBotMessage(contributor.social_identifier, "We found a story for you to join, you will be writing the " + FRAGMENT_MAPPING.get(fragment.position))
 
 
-
+"""Primary webhook endpoint where the bot logic resides
+"""
 class BotWebHookHandler(APIView):
     def get(self, request, format=None):
         """Endpoint to verify webhook with Facebook service
@@ -242,8 +243,12 @@ class BotWebHookHandler(APIView):
                         # the user should only have one incomplete fragment at a time, so 
                         # let's get it and update it
                         fragment = contributor.fragment_set.all().filter(complete=False).first()
-                        story = fragment.story
-                        readBackStory(contributor, story)
+                        if fragment:
+                            sendBotMessage(contributor.social_identifier, "Here is the story so far...")
+                            story = fragment.story
+                            readBackStory(contributor, story)
+                        else:
+                            sendBotMessage(contributor.social_identifier, "It doesn't seem you are working on a story. Send \"\start\" to join a new story")
 
                     else:
                         # the user is just inputing text, while in the 'writing' state
@@ -252,15 +257,12 @@ class BotWebHookHandler(APIView):
                         # the user should only have one incomplete fragment at a time, so 
                         # let's get it and update it
                         fragment = contributor.fragment_set.all().filter(complete=False).first()
-                        fragment.fragment = fragment.fragment + " " + message_text
-                        fragment.save()
-                        
-                        sendBotMessage(contributor.social_identifier, "Adding that to your part of the story, \"\\done\" to finish.")
+                        if fragment:
+                            fragment.fragment = fragment.fragment + " " + message_text
+                            fragment.save()
+                            sendBotMessage(contributor.social_identifier, "Adding that to your part of the story, \"\\done\" to finish.")
 
                 elif KEYWORD_HISTORY in message_text.lower():
-                    contributor.state = 'history'
-                    contributor.save()
-                
                     sendBotMessage(contributor.social_identifier, "Here is a history of your stories. Send \"\\read <story id>\" to read a story")
                     
                     fragments = Fragment.objects.filter(contributor=contributor).order_by('time_created')
@@ -273,7 +275,7 @@ class BotWebHookHandler(APIView):
                         sendBotMessage(contributor.social_identifier,  "["+complete+"] Story id: " + str(story.id))    
                     
                 elif KEYWORD_BROWSE in message_text.lower():
-                    contributor.state = 'browse'
+                    contributor.state = 'browsing'
                     contributor.save()
 
                     # get a random story
@@ -298,7 +300,8 @@ class BotWebHookHandler(APIView):
         return Response( status=status.HTTP_200_OK )
 
 
-
+"""Renders the landing page, which is just a random story
+"""
 class HomePageView(View):
     def get(self, request):
         # pick a random story and render it
@@ -318,7 +321,9 @@ class HomePageView(View):
         
         return render(request, 'stories/stories.html', context)
 
-
+"""Renders the story details page, which is just one story as
+designated by its id
+"""
 class StoryDetailView(View):
     def get(self, request, pk):
         
