@@ -35,55 +35,58 @@ def handle_browse( contributor ):
 def handle_history( contributor ):
     pass
 
-def handle_help( contributor ):
+def handle_help( contributor, detail_level=3 ):
     """Send a message to the user with all availble options
-    the bot supports
+    the bot supports.
     """
-    dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                               "Here are the basics",
-                                               [{
-                                                   "type": "postback",
-                                                   "title": "Join a story",
-                                                   "payload": KEYWORD_JOIN
-                                               },{
-                                                   "type": "postback",
-                                                   "title": "Continue last draft",
-                                                   "payload": KEYWORD_CONTINUE
-                                               },{
-                                                   "type": "postback",
-                                                   "title": "Read a random story",
-                                                   "payload": KEYWORD_BROWSE
-                                               }])
-    dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                               "Here is how you can edit your drafts",
-                                               [{
-                                                   "type": "postback",
-                                                   "title": "Undo your last edit",
-                                                   "payload": KEYWORD_UNDO
-                                               },{
-                                                   "type": "postback",
-                                                   "title": "Discard your draft",
-                                                   "payload": KEYWORD_DISCARD
-                                               },{
-                                                   "type": "postback",
-                                                   "title": "Finish draft",
-                                                   "payload": KEYWORD_DONE
-                                               }])
-    dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                               "Here are a few other helpful features",
-                                               [{
-                                                   "type": "postback",
-                                                   "title": "Read a story",
-                                                   "payload": KEYWORD_READ
-                                               },{
-                                                   "type": "postback",
-                                                   "title": "View past stories",
-                                                   "payload": KEYWORD_HISTORY
-                                               },{
-                                                   "type": "postback",
-                                                   "title": "Leave the story",
-                                                   "payload": KEYWORD_LEAVE
-                                               }])
+    if detail_level >= 1:
+        dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                                "Here are the basics",
+                                                [{
+                                                    "type": "postback",
+                                                    "title": "Join a story",
+                                                    "payload": KEYWORD_JOIN
+                                                },{
+                                                    "type": "postback",
+                                                    "title": "Continue last draft",
+                                                    "payload": KEYWORD_CONTINUE
+                                                },{
+                                                    "type": "postback",
+                                                    "title": "Read a random story",
+                                                    "payload": KEYWORD_BROWSE
+                                                }])
+    if detail_level >= 2:                                                
+        dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                                "Here is how you can edit your drafts",
+                                                [{
+                                                    "type": "postback",
+                                                    "title": "Undo your last edit",
+                                                    "payload": KEYWORD_UNDO
+                                                },{
+                                                    "type": "postback",
+                                                    "title": "Discard your draft",
+                                                    "payload": KEYWORD_DISCARD
+                                                },{
+                                                    "type": "postback",
+                                                    "title": "Finish draft",
+                                                    "payload": KEYWORD_DONE
+                                                }])
+    if detail_level >= 3:
+        dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                                "Here are a few other helpful features",
+                                                [{
+                                                    "type": "postback",
+                                                    "title": "Read a story",
+                                                    "payload": KEYWORD_READ
+                                                },{
+                                                    "type": "postback",
+                                                    "title": "View past stories",
+                                                    "payload": KEYWORD_HISTORY
+                                                },{
+                                                    "type": "postback",
+                                                    "title": "Leave the story",
+                                                    "payload": KEYWORD_LEAVE
+                                                }])
 
 
 BOT_HANDLER_MAPPING = {
