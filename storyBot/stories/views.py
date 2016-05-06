@@ -89,11 +89,14 @@ def readBackStory( contributor, story ):
 def sendHelpMessage( contributor ):
     """Sends a help message with the instructions on how to use the bot
     """
-    sendBotMessage( contributor.social_identifier, "To read a random story just send \"\\browse\"" )
-    sendBotMessage( contributor.social_identifier, "to start a story just send \"\start\"" )
-    sendBotMessage( contributor.social_identifier, "to read the story you are working on just send \"\\read\"" )
-    sendBotMessage( contributor.social_identifier, "to continue a story just send \"\continue\"" )
-    sendBotMessage( contributor.social_identifier, "to see a history of your stories just send \"history\"" )
+    try:
+        sendBotMessage( contributor.social_identifier, "To read a random story just send \"\\browse\"" )
+        sendBotMessage( contributor.social_identifier, "to start a story just send \"\start\"" )
+        sendBotMessage( contributor.social_identifier, "to read the story you are working on just send \"\\read\"" )
+        sendBotMessage( contributor.social_identifier, "to continue a story just send \"\continue\"" )
+        sendBotMessage( contributor.social_identifier, "to see a history of your stories just send \"history\"" )
+    except Exception as e:
+        print e
 
 def createStory( contributor ):
     story = Story.objects.create( title=generate_title("") )
@@ -117,7 +120,6 @@ def joinStory(contributor, story):
                                        alias=generate_alias(), 
                                        position= story.fragment_set.count(), 
                                        contributor=contributor)
-    
     # update the state of the contributor
     contributor.state = "writing"
     contributor.save()
