@@ -1,6 +1,7 @@
 import random
 
 from .keywords import *
+from .fb_chat_buttons import *
 from .models import Contributor, Story, Fragment
 
 import helpers
@@ -9,7 +10,40 @@ import dispatchers
 
 
 def handle_join( contributor ):
-    pass
+    """Join a story
+    """
+    # First let's check to make sure the user is not currently working on
+    # a story
+    if Fragment.objects.filter(contributor=contributor).filter(complete=False).count() > 0:
+        dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                                   "Looks like you are already writing a story!",
+                                                   [BUTTON_CONTINUE, BUTTON_DISCARD, BUTTON_LEAVE])
+            
+    else:
+        dispatchers.sendBotMessage(contributor.social_identifier, "Great, let's find a story for you to join!")
+
+        if Story.objects.filter(complete=False).count() > 0:
+            # there are some stories that are not complete 
+            stories = Story.objects.filter(complete=False).order_by('time_created')
+            
+            # get the first story (earliest) the user is already not a contributor to
+            for story in stories: 
+                if story.fragment_set.all().filter(contributor=contributor).count() == 0:
+                    # the contributor has not authored any of these story fragments 
+                    # so let's add them to it
+                    helpers.joinStory( contributor, story)
+                    # since the user is joining a story that already has some content
+                    # we should read it back to the user
+                    dispatchers.readBackStory( contributor, story)
+                    break # short circuit the for loop, no need to look for more 
+                    
+            if contributor.state != "writing":
+                # none of the incomplete stories had availible slots for the user, so we are going 
+                # to create a new story for the user
+                helpers.createStory( contributor )
+        else:
+            # all stories are complete, so we should create a new one
+            helpers.createStory( contributor )
 
 def handle_continue( contributor ):
     pass
@@ -42,51 +76,15 @@ def handle_help( contributor, detail_level=3 ):
     if detail_level >= 1:
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                 "Here are the basics",
-                                                [{
-                                                    "type": "postback",
-                                                    "title": "Join a story",
-                                                    "payload": KEYWORD_JOIN
-                                                },{
-                                                    "type": "postback",
-                                                    "title": "Continue last draft",
-                                                    "payload": KEYWORD_CONTINUE
-                                                },{
-                                                    "type": "postback",
-                                                    "title": "Read a random story",
-                                                    "payload": KEYWORD_BROWSE
-                                                }])
+                                                [BUTTON_JOIN, BUTTON_CONTINUE, BUTTON_BROWSE])
     if detail_level >= 2:                                                
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                 "Here is how you can edit your drafts",
-                                                [{
-                                                    "type": "postback",
-                                                    "title": "Undo your last edit",
-                                                    "payload": KEYWORD_UNDO
-                                                },{
-                                                    "type": "postback",
-                                                    "title": "Discard your draft",
-                                                    "payload": KEYWORD_DISCARD
-                                                },{
-                                                    "type": "postback",
-                                                    "title": "Finish draft",
-                                                    "payload": KEYWORD_DONE
-                                                }])
+                                                [BUTTON_UNDO, BUTTON_DISCARD, BUTTON_DONE])
     if detail_level >= 3:
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                 "Here are a few other helpful features",
-                                                [{
-                                                    "type": "postback",
-                                                    "title": "Read a story",
-                                                    "payload": KEYWORD_READ
-                                                },{
-                                                    "type": "postback",
-                                                    "title": "View past stories",
-                                                    "payload": KEYWORD_HISTORY
-                                                },{
-                                                    "type": "postback",
-                                                    "title": "Leave the story",
-                                                    "payload": KEYWORD_LEAVE
-                                                }])
+                                                [BUTTON_READ, BUTTON_HISTORY, BUTTON_LEAVE])
 
 
 BOT_HANDLER_MAPPING = {

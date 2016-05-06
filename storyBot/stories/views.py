@@ -23,35 +23,6 @@ FB_WEBHOOK_CHALLENGE = os.environ.get("FB_WEBHOOK_CHALLENGE")
 FB_APP_ID = os.environ.get("FB_APP_ID")
 FB_PAGE_ID = os.environ.get("FB_PAGE_ID")
 
-def createStory( contributor ):
-    story = Story.objects.create( title=generate_title("") )
-    # create a new fragment for the story
-    fragment = Fragment.objects.create(story=story, 
-                                       fragment="", 
-                                       alias=generate_alias(),
-                                       position=0, 
-                                       contributor=contributor)
-                        
-    # update the state of the contributor
-    contributor.state = "writing"
-    contributor.save()  
-    # the story and fragment are created, so tell the user to start the story
-    sendBotMessage(contributor.social_identifier, "You're starting a new story, you can start it!")
-
-def joinStory(contributor, story):
-    # create a fragment for the story
-    fragment = Fragment.objects.create(story=story, 
-                                       fragment="",
-                                       alias=generate_alias(), 
-                                       position= story.fragment_set.count(), 
-                                       contributor=contributor)
-    # update the state of the contributor
-    contributor.state = "writing"
-    contributor.save()
-    # notify the user what they will be writing
-    sendBotMessage(contributor.social_identifier, "We found a story for you to join, you will be writing the " + FRAGMENT_MAPPING.get(fragment.position))
-
-
 """Primary webhook endpoint where the bot logic resides
 """
 class BotWebHookHandler(APIView):
