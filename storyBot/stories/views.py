@@ -46,8 +46,7 @@ class BotWebHookHandler(APIView):
             
             if created:
                 dispatchers.sendBotMessage(contributor.social_identifier, "Thanks for joining StoryBot!")
-                break  # we want to let the user input a choice
-
+                break  # we want to let the user input a choice            
         
             if event.get('postback') and event.get('postback').get('payload'):
                 """Handle PB postback style messages

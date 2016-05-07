@@ -77,9 +77,18 @@ def handle_read( contributor, id=None ):
         story = fragment.story
         dispatchers.sendBotMessage( contributor.social_identifier, "This is the last story you worked on" )
         dispatchers.readBackStory( contributor, story )
+        dispatchers.sendBotStructuredButtonMessage(fragment.contributor.social_identifier,
+                                                           "What would you like to do now?",
+                                                           [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
 
 def handle_undo( contributor ):
-    pass
+    fragment = contributor.fragment_set.all().order_by('time_created').last()
+    if fragment.last_edit:
+        helpers.undoLastEdit( contributor )
+        dispatchers.sendBotMessage( contributor.social_identifier, "Undo done, here is what you have so far" )
+        dispatchers.readBackFragment(contributor, fragment)
+    else:
+        dispatchers.sendBotMessage( contributor.social_identifier, "I'm only starting to learn how to go back in time, so undo is limited to one edit at a time" )
 
 def handle_discard( contributor ):
     pass
@@ -92,7 +101,7 @@ def handle_done( contributor ):
     """
     fragment = contributor.fragment_set.all().filter(complete=False).first()
             
-    if fragment:
+    if fragment and fragment.fragment:
         story = fragment.story
         
         # Mark the contributor specific fragment done
@@ -123,10 +132,23 @@ def handle_done( contributor ):
                                                                 "title": "Read the story",
                                                                 "payload": "/read " + str(story.id)
                                                             }])
+    else:
+        dispatchers.sendBotMessage( contributor.social_identifier, "You need to write something" )
 
 
 def handle_browse( contributor ):
-    pass
+    """Handle the case that the user is attempting to read a random story 
+    """
+    contributor.state = 'browsing'
+    contributor.save()
+    
+    # get a random story
+    story = Story.objects.order_by('?').first()
+    dispatchers.readBackStory( contributor, story )
+    dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                                           "What would you like to do now?",
+                                                           [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
+
 
 def handle_history( contributor ):
     pass

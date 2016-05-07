@@ -110,14 +110,19 @@ def sendHelpMessage( contributor ):
     sendBotMessage( contributor.social_identifier, "to see a history of your stories just send \"history\"" )
     
 
+def readBackFragment( contributor, fragment ):
+    """
+    """
+    complete = "COMPLETE" if fragment.complete else "INCOMPLETE"
+    sendBotMessage(contributor.social_identifier, "[" + complete + "] " + FRAGMENT_MAPPING.get(fragment.position) + " by " + fragment.alias)
+    fragment_chunks = chunkString(fragment.fragment, 180)
+    for chunk in fragment_chunks:
+        sendBotMessage(contributor.social_identifier, chunk)
+
 def readBackStory( contributor, story ):
     """Reads the story back and makes sure it chunks it appropriately
     """
     sendBotMessage(contributor.social_identifier, story.title)
     story_fragments = Fragment.objects.filter(story=story).order_by('position')
     for fragment in story_fragments:
-        complete = "COMPLETE" if fragment.complete else "INCOMPLETE"
-        sendBotMessage(contributor.social_identifier, "[" + complete + "] " + FRAGMENT_MAPPING.get(fragment.position) + " by " + fragment.alias)
-        fragment_chunks = chunkString(fragment.fragment, 180)
-        for chunk in fragment_chunks:
-            sendBotMessage(contributor.social_identifier, chunk)
+        readBackFragment( contributor, fragment )

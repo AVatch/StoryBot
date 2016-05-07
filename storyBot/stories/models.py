@@ -38,6 +38,7 @@ class Contributor(models.Model):
 
 class Fragment(models.Model):
     story = models.ForeignKey(Story)
+    last_edit = models.TextField(default="") 
     fragment = models.TextField()
     position = models.IntegerField()
     alias = models.CharField(max_length=100)

@@ -57,4 +57,14 @@ def updateStory(contributor, content):
     fragment = contributor.fragment_set.all().filter(complete=False).first()
     if fragment:
         fragment.fragment += content
+        fragment.last_edit = content
+        fragment.save()
+
+def undoLastEdit(contributor):
+    """
+    """
+    fragment = contributor.fragment_set.all().filter(complete=False).first()
+    if fragment:
+        fragment.fragment = fragment.fragment[:-len(fragment.last_edit)]
+        fragment.last_edit = ""
         fragment.save()
