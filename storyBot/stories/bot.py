@@ -93,10 +93,36 @@ def handle_undo( contributor ):
         dispatchers.sendBotMessage( contributor.social_identifier, "I'm only starting to learn how to go back in time, so undo is limited to one edit at a time", True )
 
 def handle_discard( contributor ):
-    dispatchers.sendBotMessage( contributor.social_identifier, "Not implemented yet", True )
+    """Handle the case that the user is attempting to discard his fragment 
+    """
+    fragment = Fragment.objects.filter(contributor=contributor).filter(complete=False).first()
+    if fragment:
+        # erase the contents of the fragment
+        fragment.fragment = ""
+        fragment.last_edit = ""
+        fragment.save()
+        dispatchers.sendBotMessage(contributor.social_identifier,  "Your draft has been discarded, you can start writing it again", True)
+        dispatchers.sendBotMessage(contributor.social_identifier,  "Here is the story so far", True)
+        dispatchers.readBackStory(contributor, fragment.story)
+    else:
+        dispatchers.sendBotMessage(contributor.social_identifier,  "You have no story drafts to discard", True)
+        dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                                   "[StoryBot] What would you like to do?",
+                                                   [BUTTON_CONTINUE, BUTTON_DISCARD, BUTTON_LEAVE])
 
 def handle_leave( contributor ):
-    dispatchers.sendBotMessage( contributor.social_identifier, "Not implemented yet", True )
+    """Handle the case that the user is attempting to leave the story
+    """
+    fragment = Fragment.objects.filter(contributor=contributor).filter(complete=False).first()
+    if fragment:
+        # erase the contents of the fragment
+        fragment.destroy()
+        sendBotMessage(contributor.social_identifier,  "Your story fragment has been erased, and you have left the story. Send \"\start\" to join a new story")
+    else:
+        sendBotMessage(contributor.social_identifier,  "You are not working on any story", True)
+        dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                                   "[StoryBot] What would you like to do?",
+                                                   [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
 
 def handle_done( contributor ):
     """
