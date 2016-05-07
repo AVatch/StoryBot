@@ -118,15 +118,23 @@ def readBackFragment( contributor, fragment ):
     """
     """
     complete = "COMPLETE" if fragment.complete else "INCOMPLETE"
-    sendBotMessage(contributor.social_identifier, "[" + complete + "] " + FRAGMENT_MAPPING.get(fragment.position) + " by " + fragment.alias)
-    fragment_chunks = chunkString(fragment.fragment, 180)
+    
+    msg = "[" + complete + "] " + FRAGMENT_MAPPING.get(fragment.position) + " by " + fragment.alias
+    if fragment.contributor == contributor:
+        print "YYOUOYOU"
+        msg += " (you)"
+    sendBotMessage(contributor.social_identifier, msg)
+    
+    text = fragment.fragment if fragment.fragment else "[Nothing has been written yet]" 
+    fragment_chunks = chunkString(text, 180)
     for chunk in fragment_chunks:
         sendBotMessage(contributor.social_identifier, chunk)
 
 def readBackStory( contributor, story ):
     """Reads the story back and makes sure it chunks it appropriately
     """
-    sendBotMessage(contributor.social_identifier, story.title)
+    complete = "COMPLETE" if story.complete else "INCOMPLETE"
+    sendBotMessage(contributor.social_identifier, "[" + complete + "] " + story.title)
     story_fragments = Fragment.objects.filter(story=story).order_by('position')
     for fragment in story_fragments:
         readBackFragment( contributor, fragment )

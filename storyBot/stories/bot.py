@@ -196,7 +196,7 @@ def handle_history( contributor ):
         for story in story_chunk:
             buttons.append({
                                 "type": "postback",
-                                "title": "Volume " + str(story.id) + " of " + story.title,
+                                "title": "Story " + str(story.id),
                                 "payload": "/read " + str(story.id)
                             })
     
