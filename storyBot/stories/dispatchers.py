@@ -9,9 +9,13 @@ from .models import Contributor, Story, Fragment
 FB_TOKEN = os.environ.get("FB_TOKEN")
 FB_URL = os.environ.get("FB_URL")
 
-def sendBotMessage(recipient, message):
+def sendBotMessage(recipient, message, first_person=False):
     """A script to send a facebook message to recipient
     """
+    
+    if first_person:
+        message = "[StoryBot] " + message
+    
     responseBody = { 
                         'recipient': { 
                             'id': recipient

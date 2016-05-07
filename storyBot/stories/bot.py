@@ -16,11 +16,11 @@ def handle_join( contributor ):
     # a story
     if Fragment.objects.filter(contributor=contributor).filter(complete=False).count() > 0:
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                   "Looks like you are already writing a story!",
+                                                   "[StoryBot] Looks like you are already writing a story!",
                                                    [BUTTON_CONTINUE, BUTTON_DISCARD, BUTTON_LEAVE])
             
     else:
-        dispatchers.sendBotMessage(contributor.social_identifier, "Great, let's find a story for you to join!")
+        dispatchers.sendBotMessage(contributor.social_identifier, "Great, let's find a story for you to join!", True)
 
         if Story.objects.filter( complete=False ).count( ) > 0:
             # there are some stories that are not complete 
@@ -34,7 +34,7 @@ def handle_join( contributor ):
                     helpers.joinStory( contributor, story )
                     # notify the user what they will be writing
                     fragment = contributor.fragment_set.all().order_by('-time_created').first()
-                    dispatchers.sendBotMessage(contributor.social_identifier, "We found a story for you to join, you will be writing the " + FRAGMENT_MAPPING.get(fragment.position))
+                    dispatchers.sendBotMessage(contributor.social_identifier, "We found a story for you to join, you will be writing the " + FRAGMENT_MAPPING.get(fragment.position), True)
                     # since the user is joining a story that already has some content
                     # we should read it back to the user
                     dispatchers.readBackStory( contributor, story )
@@ -45,12 +45,12 @@ def handle_join( contributor ):
                 # to create a new story for the user
                 helpers.createStory( contributor )
                 # the story and fragment are created, so tell the user to start the story
-                dispatchers.sendBotMessage(contributor.social_identifier, "You're starting a new story, you can start it!")
+                dispatchers.sendBotMessage(contributor.social_identifier, "You're starting a new story, you can start it!", True)
         else:
             # all stories are complete, so we should create a new one
             helpers.createStory( contributor )
             # the story and fragment are created, so tell the user to start the story
-            dispatchers.sendBotMessage(contributor.social_identifier, "You're starting a new story, you can start it!")
+            dispatchers.sendBotMessage(contributor.social_identifier, "You're starting a new story, you can start it!", True)
 
 def handle_continue( contributor ):
     """Handle the case that the user is attempting to continue a story 
@@ -60,11 +60,11 @@ def handle_continue( contributor ):
     fragment = contributor.fragment_set.all( ).filter( complete=False ).first( )
     if fragment:
         story = fragment.story
-        dispatchers.sendBotMessage(contributor.social_identifier, "Here is the story so far...")
+        dispatchers.sendBotMessage(contributor.social_identifier, "Here is the story so far...", True)
         dispatchers.readBackStory(contributor, story)
     else:
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                "Looks like you aren't working on any story right now. What would you like to do?",
+                                                "[StoryBot] Looks like you aren't working on any story right now. What would you like to do?",
                                                 [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
 
 def handle_read( contributor, id=None ):
@@ -75,26 +75,26 @@ def handle_read( contributor, id=None ):
         # get the last story the user wrote
         fragment = contributor.fragment_set.all().order_by('time_created').last()
         story = fragment.story
-        dispatchers.sendBotMessage( contributor.social_identifier, "This is the last story you worked on" )
+        dispatchers.sendBotMessage( contributor.social_identifier, "This is the last story you worked on", True )
         dispatchers.readBackStory( contributor, story )
         dispatchers.sendBotStructuredButtonMessage(fragment.contributor.social_identifier,
-                                                           "What would you like to do now?",
+                                                           "[StoryBot] What would you like to do now?",
                                                            [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
 
 def handle_undo( contributor ):
     fragment = contributor.fragment_set.all().order_by('time_created').last()
     if fragment.last_edit:
         helpers.undoLastEdit( contributor )
-        dispatchers.sendBotMessage( contributor.social_identifier, "Undo done, here is what you have so far" )
+        dispatchers.sendBotMessage( contributor.social_identifier, "Undo done, here is what you have so far", True )
         dispatchers.readBackFragment(contributor, fragment)
     else:
-        dispatchers.sendBotMessage( contributor.social_identifier, "I'm only starting to learn how to go back in time, so undo is limited to one edit at a time" )
+        dispatchers.sendBotMessage( contributor.social_identifier, "I'm only starting to learn how to go back in time, so undo is limited to one edit at a time", True )
 
 def handle_discard( contributor ):
-    pass
+    dispatchers.sendBotMessage( contributor.social_identifier, "Not implemented yet", True )
 
 def handle_leave( contributor ):
-    pass
+    dispatchers.sendBotMessage( contributor.social_identifier, "Not implemented yet", True )
 
 def handle_done( contributor ):
     """
@@ -113,7 +113,7 @@ def handle_done( contributor ):
         contributor.save()
         
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                   "Draft submitted, awesome!",
+                                                   "[StoryBot] Draft submitted, awesome!",
                                                    [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
         
         # Check if all the fragments are done
@@ -126,7 +126,7 @@ def handle_done( contributor ):
             # Notify the contributors the story is done and send them a message with it
             for fragment in story_fragments:
                 dispatchers.sendBotStructuredButtonMessage(fragment.contributor.social_identifier,
-                                                           "One of your stories is done!",
+                                                           "[StoryBot] One of your stories is done!",
                                                            [{
                                                                 "type": "postback",
                                                                 "title": "Read the story",
@@ -146,12 +146,12 @@ def handle_browse( contributor ):
     story = Story.objects.order_by('?').first()
     dispatchers.readBackStory( contributor, story )
     dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                           "What would you like to do now?",
+                                                           "[StoryBot] What would you like to do now?",
                                                            [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
 
 
 def handle_history( contributor ):
-    pass
+    dispatchers.sendBotMessage( contributor.social_identifier, "Not implemented yet", True )
 
 def handle_help( contributor, detail_level=3 ):
     """Send a message to the user with all availble options
@@ -159,15 +159,15 @@ def handle_help( contributor, detail_level=3 ):
     """
     if detail_level >= 1:
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                "Here are the basics",
+                                                "[StoryBot] Here are the basics",
                                                 [BUTTON_JOIN, BUTTON_CONTINUE, BUTTON_BROWSE])
     if detail_level >= 2:                                                
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                "Here is how you can edit your drafts",
+                                                "[StoryBot] Here is how you can edit your drafts",
                                                 [BUTTON_UNDO, BUTTON_DISCARD, BUTTON_DONE])
     if detail_level >= 3:
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                "Here are a few other helpful features",
+                                                "[StoryBot] Here are a few other helpful features",
                                                 [BUTTON_READ, BUTTON_HISTORY, BUTTON_LEAVE])
 
 
@@ -222,15 +222,15 @@ def process_raw_message( contributor, payload ):
         else:
             BOT_HANDLER_MAPPING[ KEYWORD_READ ]( contributor ) 
     elif KEYWORD_DISCARD in processed_payload:
-        pass
+        BOT_HANDLER_MAPPING[KEYWORD_DISCARD]( contributor )
     elif KEYWORD_LEAVE in processed_payload:
-        pass
+        BOT_HANDLER_MAPPING[KEYWORD_LEAVE]( contributor )
     elif KEYWORD_CONTINUE in processed_payload:
-        pass
+        BOT_HANDLER_MAPPING[KEYWORD_CONTINUE]( contributor )
     elif KEYWORD_HISTORY in processed_payload:
-        pass
+        BOT_HANDLER_MAPPING[KEYWORD_HISTORY]( contributor )
     elif KEYWORD_BROWSE in processed_payload:
-        pass
+        BOT_HANDLER_MAPPING[KEYWORD_BROWSE]( contributor )
     else:
         if contributor.state == 'writing':
             helpers.updateStory( contributor, payload )
