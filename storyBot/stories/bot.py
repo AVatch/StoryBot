@@ -71,15 +71,17 @@ def handle_read( contributor, id=None ):
     if id:
         story = Story.objects.get(id=id)
         dispatchers.readBackStory( contributor, story )
+        
     else:
         # get the last story the user wrote
         fragment = contributor.fragment_set.all().order_by('time_created').last()
         story = fragment.story
         dispatchers.sendBotMessage( contributor.social_identifier, "This is the last story you worked on", True )
         dispatchers.readBackStory( contributor, story )
-        dispatchers.sendBotStructuredButtonMessage(fragment.contributor.social_identifier,
-                                                           "[StoryBot] What would you like to do now?",
-                                                           [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
+    
+    dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                               "[StoryBot] What would you like to do now?",
+                                               [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
 
 def handle_undo( contributor ):
     fragment = contributor.fragment_set.all().order_by('time_created').last()
@@ -151,7 +153,32 @@ def handle_browse( contributor ):
 
 
 def handle_history( contributor ):
-    dispatchers.sendBotMessage( contributor.social_identifier, "Not implemented yet", True )
+    """Handle the case that the user is attempting to see a history of their writing 
+    """
+    dispatchers.sendBotMessage(contributor.social_identifier, "Here is a history of your stories", True)
+    
+    fragments = Fragment.objects.filter(contributor=contributor).order_by('time_created')
+    stories = []
+    for fragment in fragments:
+        stories.append( fragment.story )
+    
+    chunk_size = 3 # fb lets us put only 3 buttons at a time
+    story_chunks = [stories[i:i + chunk_size] for i in range(0, len(stories), chunk_size)]
+    
+    for i, story_chunk in enumerate(story_chunks):
+        buttons = []
+        for story in story_chunk:
+            buttons.append({
+                                "type": "postback",
+                                "title": "Volume " + str(story.id) + " of " + story.title,
+                                "payload": "/read " + str(story.id)
+                            })
+    
+        dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                                "[" + str(i+1) + "/" + str(len(story_chunks)) +  "]",
+                                                buttons)
+
+    
 
 def handle_help( contributor, detail_level=3 ):
     """Send a message to the user with all availble options
