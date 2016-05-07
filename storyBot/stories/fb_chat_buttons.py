@@ -32,7 +32,7 @@ BUTTON_DONE      =  {
                     }
 BUTTON_READ      =  {
                         "type": "postback",
-                        "title": "Read a story",
+                        "title": "Read story",
                         "payload": KEYWORD_READ
                     }
 BUTTON_HISTORY   =  {

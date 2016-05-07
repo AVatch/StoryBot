@@ -1,5 +1,4 @@
-import dispatchers
-
+from .fb_chat_buttons import *
 from .alias_generator import *
 from .models import Contributor, Story, Fragment
 
@@ -30,8 +29,7 @@ def createStory( contributor ):
     # update the state of the contributor
     contributor.state = "writing"
     contributor.save()  
-    # the story and fragment are created, so tell the user to start the story
-    dispatchers.sendBotMessage(contributor.social_identifier, "You're starting a new story, you can start it!")
+    
 
 def joinStory(contributor, story):
     """
@@ -45,10 +43,18 @@ def joinStory(contributor, story):
     # update the state of the contributor
     contributor.state = "writing"
     contributor.save()
-    # notify the user what they will be writing
-    dispatchers.sendBotMessage(contributor.social_identifier, "We found a story for you to join, you will be writing the " + FRAGMENT_MAPPING.get(fragment.position))
+    
 
 def leaveStory(contributor, story):
     """
     """
     pass
+
+
+def updateStory(contributor, content):
+    """
+    """
+    fragment = contributor.fragment_set.all().filter(complete=False).first()
+    if fragment:
+        fragment.fragment += content
+        fragment.save()
