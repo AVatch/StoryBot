@@ -68,3 +68,5 @@ def undoLastEdit(contributor):
         fragment.fragment = fragment.fragment[:-len(fragment.last_edit)]
         fragment.last_edit = ""
         fragment.save()
+        
+    return fragment 

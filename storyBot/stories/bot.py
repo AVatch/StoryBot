@@ -15,6 +15,8 @@ def handle_join( contributor ):
     # First let's check to make sure the user is not currently working on
     # a story
     if Fragment.objects.filter(contributor=contributor).filter(complete=False).count() > 0:
+        contributor.state = 'writing'
+        contributor.save()
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                    "[StoryBot] Looks like you are already writing a story!",
                                                    [BUTTON_CONTINUE, BUTTON_DISCARD, BUTTON_LEAVE])
@@ -86,7 +88,7 @@ def handle_read( contributor, id=None ):
 def handle_undo( contributor ):
     fragment = contributor.fragment_set.all().order_by('time_created').last()
     if fragment.last_edit:
-        helpers.undoLastEdit( contributor )
+        fragment = helpers.undoLastEdit( contributor )
         dispatchers.sendBotMessage( contributor.social_identifier, "Undo done, here is what you have so far", True )
         dispatchers.readBackFragment(contributor, fragment)
     else:
