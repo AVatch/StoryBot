@@ -119,9 +119,9 @@ def handle_leave( contributor ):
     if fragment:
         # erase the contents of the fragment
         fragment.destroy()
-        sendBotMessage(contributor.social_identifier,  "Your story fragment has been erased, and you have left the story. Send \"\start\" to join a new story")
+        dispatchers.sendBotMessage(contributor.social_identifier,  "Your story fragment has been erased, and you have left the story. Send \"\start\" to join a new story")
     else:
-        sendBotMessage(contributor.social_identifier,  "You are not working on any story", True)
+        dispatchers.sendBotMessage(contributor.social_identifier,  "You are not working on any story", True)
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                    "[StoryBot] What would you like to do?",
                                                    [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
