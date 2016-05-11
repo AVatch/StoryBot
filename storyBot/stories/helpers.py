@@ -73,6 +73,7 @@ def updateStory(contributor, content):
     fragment = contributor.fragment_set.all().filter(complete=False).first()
     if fragment:
         fragment.fragment = fragment.fragment + " " + content
+        fragment.last_edit = content
         fragment.save()
     return fragment
     

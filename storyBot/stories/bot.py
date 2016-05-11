@@ -11,8 +11,9 @@ import dispatchers
 
 
 BASE_URL = "https://5b9e4890.ngrok.io"
-MAX_STORY_CONTRIBUTORS = 3
-MAX_STORY_FRAGMENTS_PER_CONTRIBUTOR = 5
+MAX_STORY_CONTRIBUTORS = 2
+MAX_STORY_FRAGMENTS_PER_CONTRIBUTOR = 4
+MAX_TURNS_PER_STORY = 8
 
 
 def handle_join( contributor ):
@@ -26,6 +27,7 @@ def handle_join( contributor ):
         contributor.state = 'writing'
         contributor.save()
         fragment = Fragment.objects.filter(contributor=contributor).filter(complete=False).first()
+
         dispatchers.sendBotMessage(contributor.social_identifier, "Looks like you are in the middle of a story!")
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                    "Your alias is " + fragment.alias,
@@ -46,7 +48,6 @@ def handle_join( contributor ):
         
         if availible_story:
             print "JOIN - FOUND A GOOD STORY"
-            print availible_story
             
             # join the story
             s, f = helpers.joinStory(contributor, availible_story)
@@ -69,9 +70,12 @@ def handle_join( contributor ):
                 contributor.save()
                 dispatchers.sendBotMessage(contributor.social_identifier, "It looks like it is your turn!")
             else:
-                if s.fragment_set.all().filter(contributor=contributor).count() == MAX_STORY_FRAGMENTS_PER_CONTRIBUTOR:
+                print "JOIN - NOT YOUR TURN"
+                if s.fragment_set.all().filter(contributor=contributor).count() == min( int(MAX_TURNS_PER_STORY / 2), int( MAX_TURNS_PER_STORY / s.contributors.all().count() ) ):
+                    print "JOIN - YOUVE USED ALL YOUR TURNS"
                     dispatchers.sendBotMessage(contributor.social_identifier, "You've used up all your turns! We'll let you know when the story is done!")
                 else:
+                    print "JOIN - WAIT FOR MORE INFO"
                     dispatchers.sendBotMessage(contributor.social_identifier, "We will notify you when updates are made and when it is your turn!")
             
         else:
@@ -109,13 +113,18 @@ def handle_done( contributor ):
         story_contributors = story.contributors.all()
         
         # check if the story has reached termination conditions
-        if story.fragment_set.all().filter(complete=True).count() == MAX_STORY_CONTRIBUTORS * MAX_STORY_FRAGMENTS_PER_CONTRIBUTOR:
+        if story.fragment_set.all().filter(complete=True).count() == MAX_TURNS_PER_STORY:
             # story has N fragments marked as complete
             print "|"*50
             print "STORY DONE"
             
             story.complete = True
             story.save()
+            
+            # double ensure every fragment is complete
+            for f in story.fragment_set.all():
+                f.complete = True
+                f.save()
             
             for c in story_contributors:
                 dispatchers.sendBotStructuredButtonMessage(c.social_identifier,
@@ -135,9 +144,14 @@ def handle_done( contributor ):
             for c in story_contributors:
                 if c == contributor:
                     # tell the contributor he'll be messeged when its his turn
-                    contributor_fragments_count = story.fragment_set.all().filter(contributor=contributor).count()
-                    dispatchers.sendBotMessage(contributor.social_identifier, "You have used " + str( min(contributor_fragments_count, MAX_STORY_FRAGMENTS_PER_CONTRIBUTOR) ) + " out of " + str(MAX_STORY_FRAGMENTS_PER_CONTRIBUTOR) + " turns" )
-                    dispatchers.sendBotMessage(contributor.social_identifier, "We will notify you when it is your turn again!" )
+                    total_turns = min( int(MAX_TURNS_PER_STORY / story.contributors.all().count() ), int(MAX_TURNS_PER_STORY / 2 ) )
+                    contributor_fragments_count = story.fragment_set.all().filter(contributor=c).filter(complete=True).count()
+                    dispatchers.sendBotMessage(contributor.social_identifier, "You have used " + str( contributor_fragments_count ) + " out of " + str( total_turns ) + " turns" )
+                    
+                    if contributor_fragments_count == total_turns:
+                        dispatchers.sendBotMessage(contributor.social_identifier, "We will notify you when the story is done!" )
+                    else:
+                        dispatchers.sendBotMessage(contributor.social_identifier, "We will notify you when it is your turn again!" )
                 else:
                     # notify the update in the story
                     dispatchers.sendBotMessage(c.social_identifier, "Story Updated")
@@ -146,6 +160,8 @@ def handle_done( contributor ):
             # notify the next person that it is their turn
             contributor_index = list(story_contributors).index(contributor)
             next_contributor = story_contributors[ contributor_index + 1 ] if contributor_index + 1 < len(story_contributors) else story_contributors[0]
+            
+            
             if next_contributor != contributor:
                 print "Updating the next contributor"
                 alias = story.fragment_set.all().filter(contributor=next_contributor).first().alias
@@ -157,102 +173,6 @@ def handle_done( contributor ):
             
     else:
         dispatchers.sendBotMessage(contributor.social_identifier, "Looks like you havn't written anything!")
-    
-    # fragment = contributor.fragment_set.all().filter(complete=False).first()
-            
-    # if fragment and fragment.fragment:
-    #     story = fragment.story
-        
-    #     # Mark the contributor specific fragment done
-    #     fragment.complete = True
-    #     fragment.save()
-        
-    #     # Update the contributor state
-    #     if story.fragment_set.all().filter(contributor=contributor).count() > MAX_STORY_FRAGMENTS_PER_CONTRIBUTOR:
-    #         contributor.state = "browsing"
-    #         contributor.save()
-    #         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-    #                                                 "Looks like you've submitted all your parts, we'll notify you when the story is done!",
-    #                                                 [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
-    #     else:
-    #         # Check who's turn is next
-    #         if story.contributors.all().count() > 1:
-    #             story_contributors = story.contributors.all()
-    #             contributor_index = list(story_contributors).index(contributor)
-    #             next_contributor = story_contributors[contributor_index+1] if contributor_index+1 < len(story_contributors) else story_contributors[0]
-                
-    #             print "*"*50
-    #             print story_contributors
-                
-    #             print contributor
-    #             print next_contributor
-                
-    #             dispatchers.sendBotMessage(next_contributor.social_identifier, "Hey, it's your turn to write for the story!")
-    #             dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-    #                                                 "Thanks!, We'll notify you when it's your turn to write more",
-    #                                                 [{
-    #                                                     "type": "web_url",
-    #                                                     "title": "Read the story so far",
-    #                                                     "payload": BASE_URL + "/stories/ " + str(story.id)
-    #                                                 }])
-            
-    #         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-    #                                                 "Thanks!, We'll notify you when it's your turn to write more",
-    #                                                 [BUTTON_BROWSE, BUTTON_HISTORY])
-        
-    #     # Check if all the fragments are done
-    #     if Fragment.objects.filter(story=story).filter(complete=True).count() == MAX_STORY_CONTRIBUTORS * MAX_STORY_FRAGMENTS_PER_CONTRIBUTOR:
-    #         # all the fragments are done, so let's mark the story done
-    #         story.complete = True
-    #         story.save()
-    #         # notify all the participants their story is done
-    #         story_contributors = story.contributors.all()
-    #         # Notify the contributors the story is done and send them a message with it
-    #         for contributor in story_contributors:
-    #             dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-    #                                                        "One of your stories is done, check it out!",
-    #                                                        [{
-    #                                                             "type": "postback",
-    #                                                             "title": "Read the story",
-    #                                                             "payload": "/read " + str(story.id)
-    #                                                         }])
-    # else:
-    #     dispatchers.sendBotMessage( contributor.social_identifier, "You need to write something" )
-
-
-
-
-
-def handle_continue( contributor ):
-    """Handle the case that the user is attempting to continue a story 
-    """ 
-    # the user should only have one incomplete fragment at a time, so 
-    # let's get it and update it
-    fragment = contributor.fragment_set.all( ).filter( complete=False ).first( )
-    if fragment:
-        story = fragment.story
-        dispatchers.sendBotMessage(contributor.social_identifier, "Here is the story so far...", True)
-        dispatchers.readBackStory(contributor, story)
-    else:
-        dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                "[StoryBot] Looks like you aren't working on any story right now. What would you like to do?",
-                                                [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
-
-def handle_read( contributor, id=None ):
-    if id:
-        story = Story.objects.get(id=id)
-        dispatchers.readBackStory( contributor, story )
-        
-    else:
-        # get the last story the user wrote
-        fragment = contributor.fragment_set.all().order_by('time_created').last()
-        story = fragment.story
-        dispatchers.sendBotMessage( contributor.social_identifier, "This is the last story you worked on", True )
-        dispatchers.readBackStory( contributor, story )
-    
-    dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                               "[StoryBot] What would you like to do now?",
-                                               [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
 
 def handle_undo( contributor ):
     fragment = contributor.fragment_set.all().order_by('time_created').last()
@@ -263,23 +183,6 @@ def handle_undo( contributor ):
     else:
         dispatchers.sendBotMessage( contributor.social_identifier, "I'm only starting to learn how to go back in time, so undo is limited to one edit at a time", True )
 
-def handle_discard( contributor ):
-    """Handle the case that the user is attempting to discard his fragment 
-    """
-    fragment = Fragment.objects.filter(contributor=contributor).filter(complete=False).first()
-    if fragment:
-        # erase the contents of the fragment
-        fragment.fragment = ""
-        fragment.last_edit = ""
-        fragment.save()
-        dispatchers.sendBotMessage(contributor.social_identifier,  "Your draft has been discarded, you can start writing it again", True)
-        dispatchers.sendBotMessage(contributor.social_identifier,  "Here is the story so far", True)
-        dispatchers.readBackStory(contributor, fragment.story)
-    else:
-        dispatchers.sendBotMessage(contributor.social_identifier,  "You have no story drafts to discard", True)
-        dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                   "[StoryBot] What would you like to do?",
-                                                   [BUTTON_CONTINUE, BUTTON_DISCARD, BUTTON_LEAVE])
 
 def handle_leave( contributor ):
     """Handle the case that the user is attempting to leave the story
@@ -359,12 +262,9 @@ def handle_help( contributor, detail_level=3 ):
 
 BOT_HANDLER_MAPPING = {
     KEYWORD_JOIN: handle_join,
-    KEYWORD_CONTINUE: handle_continue,
-    KEYWORD_READ: handle_read,
+    KEYWORD_DONE: handle_done,
     KEYWORD_UNDO: handle_undo,
-    KEYWORD_DISCARD: handle_discard,
     KEYWORD_LEAVE: handle_leave,
-    KEYWORD_DONE: handle_done, 
     KEYWORD_BROWSE: handle_browse,
     KEYWORD_HISTORY: handle_history,
     KEYWORD_HELP: handle_help
@@ -420,8 +320,7 @@ def process_raw_message( contributor, payload ):
     else:
         if contributor.state == "writing":
             print "UPDATING THE FRAGMENT"
-            print payload 
-            print contributor.state
+
             
             fragment = helpers.updateStory( contributor, payload )
             
