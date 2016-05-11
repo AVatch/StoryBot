@@ -2,9 +2,12 @@ import os
 import json
 import requests
 
+from django.conf import settings
+
 from .keywords import *
 from .helpers import *
 from .models import Contributor, Story, Fragment
+
 
 FB_TOKEN = os.environ.get("FB_TOKEN")
 FB_URL = os.environ.get("FB_URL")
@@ -102,7 +105,6 @@ def sendBotStructuredButtonMessage(recipient, text, buttons=[]):
                   params = { 'access_token': FB_TOKEN },
                   headers = {'content-type': 'application/json'},
                   data = json.dumps(responseBody) )
-    print r.json()
 
 def sendHelpMessage( contributor ):
     """Sends a help message with the instructions on how to use the bot
@@ -117,14 +119,8 @@ def sendHelpMessage( contributor ):
 def readBackFragment( contributor, fragment ):
     """
     """
-    complete = "COMPLETE" if fragment.complete else "INCOMPLETE"
-    
-    msg = "by " + fragment.alias
-    if fragment.contributor == contributor:
-        msg += " (you)"
-    sendBotMessage(contributor.social_identifier, msg)
-    
-    text = fragment.fragment if fragment.fragment else "[Nothing has been written yet]" 
+    text = "=>"
+    text += fragment.fragment if fragment.fragment is not "" else "[Nothing has been written yet]" 
     fragment_chunks = chunkString(text, 180)
     for chunk in fragment_chunks:
         sendBotMessage(contributor.social_identifier, chunk)
@@ -132,8 +128,18 @@ def readBackFragment( contributor, fragment ):
 def readBackStory( contributor, story ):
     """Reads the story back and makes sure it chunks it appropriately
     """
-    complete = "COMPLETE" if story.complete else "INCOMPLETE"
-    sendBotMessage(contributor.social_identifier, "[" + complete + "] " + story.title)
-    story_fragments = Fragment.objects.filter(story=story).order_by('position')
-    for fragment in story_fragments:
-        readBackFragment( contributor, fragment )
+
+    story_fragments = Fragment.objects.filter(story=story).order_by('position')[:5]
+    
+    story_snippet = ""
+    for f in story_fragments:
+        story_snippet += f.fragment if f.fragment is not "" else "[Nothing has been written yet]"
+    
+    sendBotStructuredButtonMessage(contributor.social_identifier,
+                                   story_snippet,
+                                   [{
+                                        "type": "web_url",
+                                        "title": "Read the story",
+                                        "url": settings.BASE_URL + "/stories/" + str(story.id)
+                                    }])
+    

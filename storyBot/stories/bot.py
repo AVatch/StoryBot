@@ -1,6 +1,7 @@
 import random
 
 from django.db.models import Count
+from django.conf import settings
 
 from .keywords import *
 from .fb_chat_buttons import *
@@ -9,8 +10,6 @@ from .models import Contributor, Story, Fragment
 import helpers
 import dispatchers
 
-
-BASE_URL = "https://5b9e4890.ngrok.io"
 MAX_STORY_CONTRIBUTORS = 2
 MAX_STORY_FRAGMENTS_PER_CONTRIBUTOR = 4
 MAX_TURNS_PER_STORY = 8
@@ -34,7 +33,7 @@ def handle_join( contributor ):
                                                    [{
                                                         "type": "web_url",
                                                         "title": "Read the story",
-                                                        "url": BASE_URL + "/stories/" + str(fragment.story.id)
+                                                        "url": settings.BASE_URL + "/stories/" + str(fragment.story.id)
                                                     }, BUTTON_LEAVE])
             
     else:
@@ -58,7 +57,7 @@ def handle_join( contributor ):
                                                         [{
                                                                 "type": "web_url",
                                                                 "title": "Read the story",
-                                                                "url": BASE_URL + "/stories/" + str(s.id)
+                                                                "url": settings.BASE_URL + "/stories/" + str(s.id)
                                                             }, BUTTON_LEAVE])
                                                             
             dispatchers.sendBotMessage(contributor.social_identifier, "You will have " + str(MAX_STORY_FRAGMENTS_PER_CONTRIBUTOR) + " turns in this story!")
@@ -132,7 +131,7 @@ def handle_done( contributor ):
                                                            [{
                                                                 "type": "web_url",
                                                                 "title": "Read the story",
-                                                                "url": BASE_URL + "/stories/" + str(story.id)
+                                                                "url": settings.BASE_URL + "/stories/" + str(story.id)
                                                             }, BUTTON_JOIN])
         
         else:
@@ -154,7 +153,7 @@ def handle_done( contributor ):
                         dispatchers.sendBotMessage(contributor.social_identifier, "We will notify you when it is your turn again!" )
                 else:
                     # notify the update in the story
-                    dispatchers.sendBotMessage(c.social_identifier, "Story Updated")
+                    dispatchers.sendBotMessage(c.social_identifier, "Story Updated by " + fragment.alias)
                     dispatchers.readBackFragment( c, fragment )
         
             # notify the next person that it is their turn

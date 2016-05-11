@@ -3,6 +3,7 @@ from .alias_generator import *
 from .models import Contributor, Story, Fragment
 
 
+
 def hasNumber(string):
     """check if a string contains a number
     """
