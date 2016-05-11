@@ -20,6 +20,7 @@ def createStory( contributor ):
     """
     story = Story.objects.create( title=generate_title(""), prompt=generate_prompt() )
     story.contributors.add(contributor)
+    story.save()
     
     # create a new fragment for the story
     fragment = Fragment.objects.create(story=story, 
@@ -35,21 +36,27 @@ def createStory( contributor ):
     return story, fragment
     
 
-def joinStory(contributor, story):
+def joinStory(contributor, story, alias=None):
     """
     """
     # create a fragment for the story
+    
+    if alias is None:
+        alias = generate_alias()
+    
     fragment = Fragment.objects.create(story=story, 
                                        fragment="",
-                                       alias=generate_alias(), 
+                                       alias=alias, 
                                        position=story.fragment_set.count(), 
                                        contributor=contributor)
     # update the state of the contributor
-    contributor.state = "writing"
+    contributor.state = "browsing"
     contributor.save()
     
     # update the story contributors
-    story.contributors.add(contributor)
+    if contributor not in story.contributors.all():
+        story.contributors.add(contributor)
+        story.save()
     
     return story, fragment
     
@@ -65,8 +72,11 @@ def updateStory(contributor, content):
     """
     fragment = contributor.fragment_set.all().filter(complete=False).first()
     if fragment:
-        fragment.fragment += content
+        fragment.fragment = fragment.fragment + " " + content
         fragment.save()
+    return fragment
+    
+
 
 def undoLastEdit(contributor):
     """

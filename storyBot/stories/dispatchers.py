@@ -119,9 +119,8 @@ def readBackFragment( contributor, fragment ):
     """
     complete = "COMPLETE" if fragment.complete else "INCOMPLETE"
     
-    msg = "[" + complete + "] " + FRAGMENT_MAPPING.get(fragment.position) + " by " + fragment.alias
+    msg = "by " + fragment.alias
     if fragment.contributor == contributor:
-        print "YYOUOYOU"
         msg += " (you)"
     sendBotMessage(contributor.social_identifier, msg)
     
