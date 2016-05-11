@@ -16,6 +16,7 @@ from rest_framework.response import Response
 import bot
 import dispatchers
 from .keywords import *
+from .fb_chat_buttons import *
 from .models import Contributor, Fragment, Story
 from .alias_generator import generate_alias, generate_title
 
@@ -46,6 +47,9 @@ class BotWebHookHandler(APIView):
             
             if created:
                 dispatchers.sendBotMessage(contributor.social_identifier, "Thanks for joining StoryBot!")
+                dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                                   "Let's get started.",
+                                                   [BUTTON_JOIN, BUTTON_BROWSE])
                 break  # we want to let the user input a choice            
         
             if event.get('postback') and event.get('postback').get('payload'):

@@ -18,10 +18,12 @@ def chunkString(string, length):
 def createStory( contributor ):
     """
     """
-    story = Story.objects.create( title=generate_title("") )
+    story = Story.objects.create( title=generate_title(""), prompt=generate_prompt() )
+    story.contributors.add(contributor)
+    
     # create a new fragment for the story
     fragment = Fragment.objects.create(story=story, 
-                                       fragment="", 
+                                       fragment="",
                                        alias=generate_alias(),
                                        position=0, 
                                        contributor=contributor)
@@ -29,6 +31,8 @@ def createStory( contributor ):
     # update the state of the contributor
     contributor.state = "writing"
     contributor.save()  
+    
+    return story, fragment
     
 
 def joinStory(contributor, story):
@@ -38,11 +42,16 @@ def joinStory(contributor, story):
     fragment = Fragment.objects.create(story=story, 
                                        fragment="",
                                        alias=generate_alias(), 
-                                       position= story.fragment_set.count(), 
+                                       position=story.fragment_set.count(), 
                                        contributor=contributor)
     # update the state of the contributor
     contributor.state = "writing"
     contributor.save()
+    
+    # update the story contributors
+    story.contributors.add(contributor)
+    
+    return story, fragment
     
 
 def leaveStory(contributor, story):
@@ -57,7 +66,6 @@ def updateStory(contributor, content):
     fragment = contributor.fragment_set.all().filter(complete=False).first()
     if fragment:
         fragment.fragment += content
-        fragment.last_edit = content
         fragment.save()
 
 def undoLastEdit(contributor):

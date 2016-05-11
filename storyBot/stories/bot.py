@@ -8,6 +8,10 @@ import helpers
 import dispatchers
 
 
+BASE_URL = "https://5b9e4890.ngrok.io"
+MAX_STORY_PARTICIPANTS = 3
+MAX_STORY_FRAGMENTS_PER_PARTICIPANT = 5
+
 
 def handle_join( contributor ):
     """Join a story
@@ -33,10 +37,13 @@ def handle_join( contributor ):
                 if story.fragment_set.all( ).filter( contributor=contributor ).count( ) == 0:
                     # the contributor has not authored any of these story fragments 
                     # so let's add them to it
-                    helpers.joinStory( contributor, story )
+                    s, f = helpers.joinStory( contributor, story )
                     # notify the user what they will be writing
                     fragment = contributor.fragment_set.all().order_by('-time_created').first()
+                    
                     dispatchers.sendBotMessage(contributor.social_identifier, "We found a story for you to join, you will be writing the " + FRAGMENT_MAPPING.get(fragment.position), True)
+                    dispatchers.sendBotMessage(contributor.social_identifier, "For this we'll call you " + f.alias, True)
+                    
                     # since the user is joining a story that already has some content
                     # we should read it back to the user
                     dispatchers.readBackStory( contributor, story )
@@ -45,14 +52,20 @@ def handle_join( contributor ):
             if contributor.state != "writing":
                 # none of the incomplete stories had availible slots for the user, so we are going 
                 # to create a new story for the user
-                helpers.createStory( contributor )
+                s, f = helpers.createStory( contributor )
                 # the story and fragment are created, so tell the user to start the story
                 dispatchers.sendBotMessage(contributor.social_identifier, "You're starting a new story, you can start it!", True)
+                dispatchers.sendBotMessage(contributor.social_identifier, "For this we'll call you " + f.alias, True)
+                dispatchers.sendBotMessage(contributor.social_identifier, "Here is some inspiration if you need it!", True)
+                dispatchers.sendBotMessage(contributor.social_identifier, s.prompt, True)
         else:
             # all stories are complete, so we should create a new one
-            helpers.createStory( contributor )
+            s, f = helpers.createStory( contributor )
             # the story and fragment are created, so tell the user to start the story
             dispatchers.sendBotMessage(contributor.social_identifier, "You're starting a new story, you can start it!", True)
+            dispatchers.sendBotMessage(contributor.social_identifier, "For this we'll call you " + f.alias, True)
+            dispatchers.sendBotMessage(contributor.social_identifier, "Here is some inspiration if you need it!", True)
+            dispatchers.sendBotMessage(contributor.social_identifier, s.prompt, True)
 
 def handle_continue( contributor ):
     """Handle the case that the user is attempting to continue a story 
@@ -139,24 +152,49 @@ def handle_done( contributor ):
         fragment.save()
         
         # Update the contributor state
-        contributor.state = "browsing"
-        contributor.save()
-        
-        dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                   "[StoryBot] Draft submitted, awesome!",
-                                                   [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
+        if story.fragment_set.all().filter(contributor=contributor).count() > MAX_STORY_FRAGMENTS_PER_PARTICIPANT:
+            contributor.state = "browsing"
+            contributor.save()
+            dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                                    "Looks like you've submitted all your parts, we'll notify you when the story is done!",
+                                                    [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
+        else:
+            # Check who's turn is next
+            if story.contributors.all().count() > 1:
+                story_contributors = story.contributors.all()
+                contributor_index = list(story_contributors).index(contributor)
+                next_contributor = story_contributors[contributor_index+1] if contributor_index+1 < len(story_contributors) else story_contributors[0]
+                
+                print "*"*50
+                print story_contributors
+                
+                print contributor
+                print next_contributor
+                
+                dispatchers.sendBotMessage(next_contributor.social_identifier, "Hey, it's your turn to write for the story!")
+                dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                                    "Thanks!, We'll notify you when it's your turn to write more",
+                                                    [{
+                                                        "type": "web_url",
+                                                        "title": "Read the story so far",
+                                                        "payload": BASE_URL + "/stories/ " + str(story.id)
+                                                    }])
+            
+            dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                                    "Thanks!, We'll notify you when it's your turn to write more",
+                                                    [BUTTON_BROWSE, BUTTON_HISTORY])
         
         # Check if all the fragments are done
-        if Fragment.objects.filter(story=story).filter(complete=True).count() == 3:
+        if Fragment.objects.filter(story=story).filter(complete=True).count() == MAX_STORY_PARTICIPANTS * MAX_STORY_FRAGMENTS_PER_PARTICIPANT:
             # all the fragments are done, so let's mark the story done
             story.complete = True
             story.save()
             # notify all the participants their story is done
-            story_fragments = Fragment.objects.filter(story=story)
+            story_contributors = story.contributors.all()
             # Notify the contributors the story is done and send them a message with it
-            for fragment in story_fragments:
-                dispatchers.sendBotStructuredButtonMessage(fragment.contributor.social_identifier,
-                                                           "[StoryBot] One of your stories is done!",
+            for contributor in story_contributors:
+                dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                                           "One of your stories is done, check it out!",
                                                            [{
                                                                 "type": "postback",
                                                                 "title": "Read the story",
@@ -288,11 +326,13 @@ def process_raw_message( contributor, payload ):
         BOT_HANDLER_MAPPING[KEYWORD_BROWSE]( contributor )
     else:
         if contributor.state == 'writing':
+            
+            
             helpers.updateStory( contributor, payload )
             
             dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                        "Story updated",
-                                                       [BUTTON_UNDO, BUTTON_READ, BUTTON_DONE])
+                                                       [BUTTON_DONE, BUTTON_UNDO])
             
         else:
             # we didn't understand the input so show user all

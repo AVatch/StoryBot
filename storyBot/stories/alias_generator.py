@@ -15,3 +15,11 @@ def generate_title(contents):
     content
     """
     return "An amazing story in search of a title"
+
+def generate_prompt( ):
+    """
+    """
+    prompt = random.choice(open(os.path.join(settings.BASE_DIR, 'stories/data/prompts.txt')).readlines())
+    return prompt
+
+    

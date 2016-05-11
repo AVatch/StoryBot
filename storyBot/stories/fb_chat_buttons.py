@@ -17,7 +17,7 @@ BUTTON_BROWSE    =  {
                     }
 BUTTON_UNDO      =  {
                         "type": "postback",
-                        "title": "Undo your last edit",
+                        "title": "Undo",
                         "payload": KEYWORD_UNDO
                     }
 BUTTON_DISCARD   =  {
@@ -27,7 +27,7 @@ BUTTON_DISCARD   =  {
                     }
 BUTTON_DONE      =  {
                         "type": "postback",
-                        "title": "Finish draft",
+                        "title": "Done",
                         "payload": KEYWORD_DONE
                     }
 BUTTON_READ      =  {
