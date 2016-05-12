@@ -150,7 +150,7 @@ def handle_done( contributor ):
                 next_contributor.state = "writing"
                 next_contributor.save()
 
-                dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                dispatchers.sendBotStructuredButtonMessage(next_contributor.social_identifier,
                                                    ":|] It's your turn!",
                                                    [{
                                                         "type": "web_url",
