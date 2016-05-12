@@ -151,7 +151,7 @@ def handle_done( contributor ):
                 next_contributor.save()
 
                 dispatchers.sendBotStructuredButtonMessage(next_contributor.social_identifier,
-                                                   ":|] It's your turn!",
+                                                   ":|] It's your turn! (just send us a message and we'll add it to your story's part)",
                                                    [{
                                                         "type": "web_url",
                                                         "title": "Read the story",
