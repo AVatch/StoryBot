@@ -73,7 +73,7 @@ def handle_join( contributor ):
             dispatchers.sendBotMessage(contributor.social_identifier, ":|] You're starting a new story, you can start it!")
             dispatchers.sendBotMessage(contributor.social_identifier, ":|] For this we'll call you " + f.alias)
             dispatchers.sendBotMessage(contributor.social_identifier, ":|] Here is some inspiration if you need it!")
-            dispatchers.sendBotMessage(contributor.social_identifier, s.prompt)
+            dispatchers.sendBotMessage(contributor.social_identifier, "o.O " + s.prompt)
             
             dispatchers.sendBotMessage(contributor.social_identifier, ":|] You will have " + str(MAX_STORY_FRAGMENTS_PER_CONTRIBUTOR) + " turns in this story!")
             dispatchers.sendBotMessage(contributor.social_identifier, ":|] You can start writing your part!")
@@ -116,7 +116,7 @@ def handle_done( contributor ):
                                                                 "type": "web_url",
                                                                 "title": "Read the story",
                                                                 "url": settings.BASE_URL + "/stories/" + str(story.id)
-                                                            }, BUTTON_JOIN])
+                                                            }, BUTTON_JOIN, BUTTON_BROWSE])
         
         else:
             # the story is not done, so broadcast the latest update to the rest and notify the next person 
