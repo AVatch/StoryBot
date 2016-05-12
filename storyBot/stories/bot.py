@@ -220,7 +220,10 @@ def handle_history( contributor ):
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                 "[" + str(i+1) + "/" + str(len(story_chunks)) +  "]",
                                                 buttons)
-
+        
+    dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                            ":|] What would you like to do now?",
+                                            [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
     
 
 def handle_help( contributor, detail_level=3 ):
