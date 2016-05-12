@@ -119,11 +119,12 @@ def sendHelpMessage( contributor ):
 def readBackFragment( contributor, fragment ):
     """
     """
-    text = "=>"
-    text += fragment.fragment if fragment.fragment is not "" else "[Nothing has been written yet]" 
-    fragment_chunks = chunkString(text, 180)
-    for chunk in fragment_chunks:
-        sendBotMessage(contributor.social_identifier, chunk)
+    if fragment:
+        text = ""
+        text += fragment.fragment if fragment.fragment is not "" else "[Nothing has been written yet]" 
+        fragment_chunks = chunkString(text, 180)
+        for chunk in fragment_chunks:
+            sendBotMessage(contributor.social_identifier, "<(\") " + "\"" + chunk + "\"")
 
 def readBackStory( contributor, story ):
     """Reads the story back and makes sure it chunks it appropriately
@@ -135,6 +136,7 @@ def readBackStory( contributor, story ):
     for f in story_fragments:
         story_snippet += f.fragment if f.fragment is not "" else "[Nothing has been written yet]"
     
+    story_snippet = "<(\") \"" + story_snippet[:100] + "...\""
     sendBotStructuredButtonMessage(contributor.social_identifier,
                                    story_snippet,
                                    [{

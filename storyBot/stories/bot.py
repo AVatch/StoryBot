@@ -150,20 +150,30 @@ def handle_done( contributor ):
                 next_contributor.state = "writing"
                 next_contributor.save()
 
-                dispatchers.sendBotMessage(next_contributor.social_identifier, ":|] It's your turn!")
+                dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                                   ":|] It's your turn!",
+                                                   [{
+                                                        "type": "web_url",
+                                                        "title": "Read the story",
+                                                        "url": settings.BASE_URL + "/stories/" + str(s.id)
+                                                    }])
+                            
             
     else:
         dispatchers.sendBotMessage(contributor.social_identifier, ":|] Looks like you havn't written anything!")
 
 def handle_undo( contributor ):
-    fragment = contributor.fragment_set.all().order_by('time_created').last()
-    if fragment.last_edit:
-        fragment = helpers.undoLastEdit( contributor )
-        dispatchers.sendBotMessage( contributor.social_identifier, ":|] Undo done, here is what you have so far", True )
-        dispatchers.readBackFragment(contributor, fragment)
+    if contributor.state == "writing":
+        fragment = contributor.fragment_set.all().order_by('time_created').last()
+        if fragment and fragment.last_edit:
+            f = helpers.undoLastEdit( contributor )
+            dispatchers.sendBotMessage( contributor.social_identifier, ":|] Undo done, here is what you have so far" )
+        else:
+            dispatchers.sendBotMessage( contributor.social_identifier, ":|] I'm only starting to learn how to go back in time, so undo is limited to one edit at a time")
     else:
-        dispatchers.sendBotMessage( contributor.social_identifier, ":|] I'm only starting to learn how to go back in time, so undo is limited to one edit at a time", True )
-
+            dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                                   ":|] It doesn't look like you are writing anything at the moment",
+                                                   [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
 
 def handle_leave( contributor ):
     """Handle the case that the user is attempting to leave the story
