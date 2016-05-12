@@ -2,6 +2,8 @@
 
 {% block content %}
 
+
+
 <div class="vertical-center">
     
     
@@ -26,18 +28,26 @@
         
     <div class="story">
         <h2>{{ story.title }}</h2>
+        
+        <div class="row legend">
+            {% for contributor_id, contributor in contributors.items %}
+                <div class="row">
+                    <div class="col-xs-3"></div>
+                    <div class="col-xs-2">
+                        <span class="legend-color" style="background-color:{{ contributor.color }};"></span>
+                    </div>
+                    <div class="col-xs-4">
+                        <span class="legend-text">{{ contributor.alias }}</span>
+                    </div>
+                    <div class="col-xs-3"></div>
+               </div>
+                    
+            {% endfor %}
+        </div>
+        
         {% for fragment in fragments %}
-            <div class="fragment">
-                <h4> {% if fragment.position == 0 %} 
-                        Begining
-                    {% elif fragment.position == 1 %} 
-                        Middle
-                    {% else %}
-                        End
-                    {% endif %}
-                    by {{ fragment.alias }}</h4>
-                
-                <p>{{ fragment.fragment }}</p>
+            <div class="row fragment">
+                <p style="opacity: 0.9; background-color: {{ contributors|get_item:fragment.contributor.id|get_item:'color' }};">{{ fragment.fragment }}</p>
             </div>
             
         {% endfor %}

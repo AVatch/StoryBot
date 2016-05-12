@@ -70,3 +70,32 @@
     display: block;
     height: 21px;   
 }
+
+
+.legend{
+    text-align: center; 
+}
+
+.legend div{
+    margin-bottom: 5px;
+}
+
+.legend-color{
+    display: block;
+    float: right;
+    width: 25px;
+    height: 25px;
+    border-radius: 25px;
+    opacity: 0.4;
+}
+.legend-text{
+    
+    font-family: medium-content-sans-serif-font,"Lucida Grande","Lucida Sans Unicode","Lucida Sans",Geneva,Arial,sans-serif;
+    letter-spacing: -.02em;
+    font-weight: 300;
+    font-style: normal;
+    font-size: 28px;
+    margin-left: -1.75px;
+    line-height: 1.22;
+    letter-spacing: -.022em;
+}

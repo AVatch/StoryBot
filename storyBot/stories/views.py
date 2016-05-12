@@ -8,6 +8,7 @@ import requests
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import View
+from django.template.defaulttags import register
 
 from rest_framework import status
 from rest_framework.views import APIView
@@ -23,6 +24,16 @@ from .alias_generator import generate_alias, generate_title
 FB_WEBHOOK_CHALLENGE = os.environ.get("FB_WEBHOOK_CHALLENGE")
 FB_APP_ID = os.environ.get("FB_APP_ID")
 FB_PAGE_ID = os.environ.get("FB_PAGE_ID")
+
+
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
+
+
+
+
 
 """Primary webhook endpoint where the bot logic resides
 """
@@ -69,6 +80,8 @@ class BotWebHookHandler(APIView):
         return Response( status=status.HTTP_200_OK )
 
 
+
+
 """Renders the landing page, which is just a random story
 """
 class HomePageView(View):
@@ -98,17 +111,28 @@ class StoryDetailView(View):
         
         story = get_object_or_404(Story, pk=pk)
         
+        contributors = {}
         context = {
             "story": story,
             "fragments": [],
+            "contributors": contributors,
             "FB_APP_ID": FB_APP_ID,
             "FB_PAGE_ID": FB_PAGE_ID
         }
+
+        context["fragments"] = Fragment.objects.filter(story=story).order_by('position')
         
-        if story:
-            story_fragments = Fragment.objects.filter(story=story).order_by('position')                
-            
-            context["fragments"] = story_fragments
+        for contributor in story.contributors.all():
+            color = "#%06x" % random.randint(0, 0xFFFFFF)
+            context["contributors"][contributor.id] = {
+                "color": color,
+                "alias": ""
+            }
+            fragment = story.fragment_set.filter(contributor=contributor).first()
+            if fragment:
+                context["contributors"][contributor.id]["alias"] = fragment.alias
         
+        print context
+    
         return render(request, 'stories/stories.html', context)
 
