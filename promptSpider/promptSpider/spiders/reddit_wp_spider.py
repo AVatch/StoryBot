@@ -29,7 +29,7 @@ class RedditWPSpider(CrawlSpider):
             if '[wp]' in prompt.lower():
                 # save item
                 prompt_item = PromptItem()
-                prompt_item['prompt'] = prompt
+                prompt_item['prompt'] = prompt.replace('[WP]', '').replace('[wp]', '').strip()
                 prompt_item['link'] = response.urljoin(link)
                 yield prompt_item
         
