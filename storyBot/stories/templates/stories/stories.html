@@ -15,10 +15,17 @@
                                 <span style="background-color:{{ contributor.color }};" >{{ contributor.alias }}</span>,  
                             {% endfor %}            
                          on {{ story.time_modified|date:"DATE_FORMAT" }}</span>
-                         <div class="fb-share-button" 
-                            data-href="{{ story_url_path }}" 
-                            data-layout="button_count">
-                        </div>
+                         <div class="row">
+                            <div class="fb-share-button col-xs-2" 
+                                data-href="{{ story_url_path }}" 
+                                data-layout="button_count">
+                            </div>
+                            <div style="padding-top:7px;">
+                                <a class="twitter-share-button col-xs-2"
+                                href="https://twitter.com/intent/tweet">
+                                Tweet</a>
+                            </div>
+                         </div>
                     </div>
                 </div>
             </div>
