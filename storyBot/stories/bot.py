@@ -170,8 +170,18 @@ def handle_undo( contributor ):
         if fragment and fragment.last_edit:
             f = helpers.undoLastEdit( contributor )
             dispatchers.sendBotMessage( contributor.social_identifier, ":|] Undo done, here is what you have so far" )
+            dispatchers.readBackFragment( contributor, f )
         else:
             dispatchers.sendBotMessage( contributor.social_identifier, ":|] I'm only starting to learn how to go back in time, so undo is limited to one edit at a time")
+        
+        dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                                   ":|] What would you like to do now?",
+                                                   [BUTTON_DONE, {
+                                                        "type": "web_url",
+                                                        "title": "Read the story",
+                                                        "url": settings.BASE_URL + "/stories/" + str(f.story.id)
+                                                    }])
+                                                   
     else:
             dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                    ":|] It doesn't look like you are writing anything at the moment",
@@ -298,7 +308,7 @@ def process_raw_message( contributor, payload ):
         if contributor.state == "writing":
             fragment = helpers.updateStory( contributor, payload )            
             dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                       ":|] Story updated!",
+                                                       ":|] Story updated! (You can keep writing by sending more messages)",
                                                        [BUTTON_DONE, BUTTON_UNDO])
         else:
             # we didn't understand the input so show user all
