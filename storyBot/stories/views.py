@@ -29,7 +29,10 @@ FB_PAGE_ID = os.environ.get("FB_PAGE_ID")
 
 @register.filter
 def get_item(dictionary, key):
-    return dictionary.get(key)
+    if dictionary:
+        return dictionary.get(key)
+    else:
+        return None
 
 
 
