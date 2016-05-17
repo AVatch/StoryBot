@@ -5,6 +5,7 @@ from .models import Contributor, Fragment, Story
 
 class ContributorAdmin(admin.ModelAdmin):
     model = Contributor
+    list_display = ('state', 'social_identifier')
 admin.site.register(Contributor, ContributorAdmin)
 
 
