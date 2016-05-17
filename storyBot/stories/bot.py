@@ -27,7 +27,7 @@ def handle_join( contributor ):
 
         dispatchers.sendBotMessage(contributor.social_identifier, ":|] Looks like you are in the middle of a story!")
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                   ":|] Your alias is " + fragment.alias,
+                                                   ":|] Your alias for this story is " + fragment.alias,
                                                    [{
                                                         "type": "web_url",
                                                         "title": "Read the story",
@@ -48,8 +48,10 @@ def handle_join( contributor ):
             s, f = helpers.joinStory(contributor, availible_story)
             # tell the user they are paired up
             dispatchers.sendBotMessage(contributor.social_identifier, ":|] We found a story for you to join!")
+            dispatchers.sendBotMessage(contributor.social_identifier, ":|] Here is the prompt if you wish to follow it.")
+            dispatchers.sendBotMessage(contributor.social_identifier, "o.O " + availible_story.prompt)
             dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                        ":|] Your alias will be " + f.alias,
+                                                        ":|] Your alias for this story will be " + f.alias,
                                                         [{
                                                                 "type": "web_url",
                                                                 "title": "Read the story",

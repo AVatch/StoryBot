@@ -49,9 +49,6 @@ class BotWebHookHandler(APIView):
     def post(self, request, format=None):
         """Main entry point for Messenger conversations
         """
-        
-        print "POSTING HERE"
-
         messenger_events = request.data.get('entry')[0].get('messaging')
         
         for event in messenger_events:
