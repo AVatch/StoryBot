@@ -8,11 +8,14 @@ class ContributorAdmin(admin.ModelAdmin):
 admin.site.register(Contributor, ContributorAdmin)
 
 
-class FragmentAdmin(admin.ModelAdmin):
+class FragmentInline(admin.TabularInline):
     model = Fragment
-admin.site.register(Fragment, FragmentAdmin)
-
+    extra = 1
 
 class StoryAdmin(admin.ModelAdmin):
     model = Story
+    inlines = [
+        FragmentInline,
+    ]
 admin.site.register(Story, StoryAdmin)
+
