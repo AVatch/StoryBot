@@ -151,3 +151,12 @@ class StoryDetailView(View):
     
         return render(request, 'stories/stories.html', context)
 
+"""Renders the about page
+"""
+class AboutPageView(View):
+    def get(self, request):
+        context = {
+            "FB_APP_ID": FB_APP_ID,
+            "FB_PAGE_ID": FB_PAGE_ID
+        }
+        return render(request, 'about.html', context)

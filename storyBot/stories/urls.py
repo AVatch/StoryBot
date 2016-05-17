@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from django.views.generic import TemplateView
-from .views import BotWebHookHandler, HomePageView, StoryDetailView
+from .views import BotWebHookHandler, HomePageView, StoryDetailView, AboutPageView
 
 # API endpoints
 urlpatterns = [
@@ -9,7 +9,7 @@ urlpatterns = [
         name='home'),
     
     url(r'^about$',
-         TemplateView.as_view(template_name='about.html')),
+         AboutPageView.as_view(),),
     
     url(r'^stories/(?P<pk>[0-9]+)$',
         StoryDetailView.as_view(),
