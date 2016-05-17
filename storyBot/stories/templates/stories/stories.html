@@ -16,7 +16,7 @@
                             {% endfor %}            
                          on {{ story.time_modified|date:"DATE_FORMAT" }}</span>
                          <div class="fb-share-button" 
-                            data-href="http://www.your-domain.com/your-page.html" 
+                            data-href="{{ story_url_path }}" 
                             data-layout="button_count">
                         </div>
                     </div>

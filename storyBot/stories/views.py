@@ -9,6 +9,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import View
 from django.template.defaulttags import register
+from django.conf import settings
 
 from rest_framework import status
 from rest_framework.views import APIView
@@ -24,7 +25,6 @@ from .alias_generator import generate_alias, generate_title, generate_random_gif
 FB_WEBHOOK_CHALLENGE = os.environ.get("FB_WEBHOOK_CHALLENGE")
 FB_APP_ID = os.environ.get("FB_APP_ID")
 FB_PAGE_ID = os.environ.get("FB_PAGE_ID")
-
 
 
 @register.filter
@@ -95,6 +95,7 @@ class HomePageView(View):
                 "story": story,
                 "fragments": [],
                 "description": "",
+                "story_url_path": settings.BASE_URL + "/stories/" + str(story.id),
                 "cover": generate_random_gif(),
                 "contributors": contributors,
                 "FB_APP_ID": FB_APP_ID,
@@ -120,6 +121,7 @@ class HomePageView(View):
                 "story": None,
                 "fragments": [],
                 "description": "",
+                "story_url_path": settings.BASE_URL,
                 "cover": generate_random_gif(),
                 "contributors": [],
                 "FB_APP_ID": FB_APP_ID,
@@ -140,6 +142,7 @@ class StoryDetailView(View):
             "story": story,
             "fragments": [],
             "description": "",
+            "story_url_path": settings.BASE_URL + "/stories/" + str(story.id),
             "cover": generate_random_gif(),
             "contributors": contributors,
             "FB_APP_ID": FB_APP_ID,

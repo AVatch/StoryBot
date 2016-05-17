@@ -15,7 +15,7 @@
     
     
     {% if story %}
-    <meta property="og:url"           content="http://www.your-domain.com/your-page.html" />
+    <meta property="og:url"           content="{{ story_url_path }}" />
 	<meta property="og:type"          content="website" />
 	<meta property="og:title"         content="{{ story.prompt }}" />
 	<meta property="og:description"   content="{{ description }}" />
@@ -90,33 +90,8 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                    <ul class="list-inline text-center">
-                        <li>
-                            <a href="#">
-                                <span class="fa-stack fa-lg">
-                                    <i class="fa fa-circle fa-stack-2x"></i>
-                                    <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
-                                </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <span class="fa-stack fa-lg">
-                                    <i class="fa fa-circle fa-stack-2x"></i>
-                                    <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
-                                </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <span class="fa-stack fa-lg">
-                                    <i class="fa fa-circle fa-stack-2x"></i>
-                                    <i class="fa fa-github fa-stack-1x fa-inverse"></i>
-                                </span>
-                            </a>
-                        </li>
-                    </ul>
                     <p class="copyright text-muted">Copyright &copy; <a href="https://twitter.com/AVatchinsky" target="_blank">Adrian Vatchinsky</a 2016</p>
+                    {{ request.path }}
                 </div>
             </div>
         </div>
