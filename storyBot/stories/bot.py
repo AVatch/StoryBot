@@ -64,6 +64,9 @@ def handle_join( contributor ):
             if s.fragment_set.all().filter(complete=True).count() == s.fragment_set.all().count() - 1:
                 contributor.state = "writing"
                 contributor.save()
+                
+            
+                
                 dispatchers.sendBotMessage(contributor.social_identifier, ":|] It looks like it is your turn!")
             else:
                 dispatchers.sendBotMessage(contributor.social_identifier, ":|] We will notify you when updates are made and when it is your turn!")
@@ -151,7 +154,10 @@ def handle_done( contributor ):
                 s, f = helpers.joinStory(next_contributor, story, alias)
                 next_contributor.state = "writing"
                 next_contributor.save()
-
+                
+                
+                
+                
                 dispatchers.sendBotStructuredButtonMessage(next_contributor.social_identifier,
                                                    ":|] It's your turn! (just send us a message and we'll add it to your story's part)",
                                                    [{
@@ -159,7 +165,11 @@ def handle_done( contributor ):
                                                         "title": "Read the story",
                                                         "url": settings.BASE_URL + "/stories/" + str(s.id)
                                                     }])
-                            
+                # figure out the num of turns left
+                total_turns = min( int(MAX_TURNS_PER_STORY / s.contributors.all().count() ), int(MAX_TURNS_PER_STORY / 2 ) )
+                contributor_fragments_count = s.fragment_set.all().filter(contributor=next_contributor).filter(complete=True).count()
+                
+                dispatchers.sendBotMessage(next_contributor.social_identifier, ":|] You have used " + str( total_turns - contributor_fragments_count ) + " turns left including this one." )            
             
     else:
         dispatchers.sendBotMessage(contributor.social_identifier, ":|] Looks like you havn't written anything!")
@@ -306,7 +316,8 @@ def process_raw_message( contributor, payload ):
         BOT_HANDLER_MAPPING[KEYWORD_BROWSE]( contributor )
     else:
         if contributor.state == "writing":
-            fragment = helpers.updateStory( contributor, payload )            
+            fragment = helpers.updateStory( contributor, payload )
+            story = fragment.story      
             dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                        ":|] Story updated! (You can keep writing by sending more messages)",
                                                        [BUTTON_DONE, BUTTON_UNDO])
