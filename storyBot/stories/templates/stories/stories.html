@@ -1,67 +1,40 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    <!-- Page Header -->
+    <!-- Set your background image for this header on the line below. -->
+    <header class="intro-header" style="background-color:black;">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>{{ story.prompt }}</h1>
+                        <h2 class="subheading">{% if story.complete %} Completed {% else %} Incomplete {% endif %}</h2>
+                        <span class="meta">Created by 
+                            {% for contributor_id, contributor in contributors.items %}
+                                <span style="background-color:{{ contributor.color }};" >{{ contributor.alias }}</span>,  
+                            {% endfor %}            
+                         on {{ story.time_modified }}</span>
 
-
-
-<div class="vertical-center">
-    
-    
-    <div class="about">
-        
-        <p>This is an experiment in crowd sourced story telling</p>
-        <!--<p>
-            <a href="https://twitter.com/AVatchinsky" target="_blank">@AVatchinsky</a>
-        </p>-->
-        
-        <div class="messege-us-btn-container animated rubberBand">
-        <div class="horizontal-center">
-            <div class="fb-messengermessageus" 
-                messenger_app_id="{{ FB_APP_ID }}"
-                page_id="{{ FB_PAGE_ID }}"
-                color="blue"
-                size="xlarge" ></div>
-        </div>
-        </div>
-
-    </div>
-        
-    <div class="story">
-        <h2>{{ story.title }}</h2>
-        
-        <div class="horizontal-center">
-        <div class="legend">
-            {% for contributor_id, contributor in contributors.items %}
-                <div class="row">
-                    
-                    <div>
-                        <span class="legend-color" style="background-color:{{ contributor.color }};"></span>
                     </div>
-                    <div>
-                        <span class="legend-text">{{ contributor.alias }}</span>
-                    </div>
-                    
-               </div>
-                    
-            {% endfor %}
-        </div>
-        </div>
-        
-        {% for fragment in fragments %}
-            <div class="fragment">
-                <p style="opacity: 0.9; color: {{ contributors|get_item:fragment.contributor.id|get_item:'color' }};">{{ fragment.fragment }}</p>
+                </div>
             </div>
-            
-        {% endfor %}
-    </div>
-    
-    
-    
-</div>
+        </div>
+    </header>
 
-
-
-
-
+    <!-- Post Content -->
+    <article>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    
+                    {% for fragment in fragments %}
+                        <p style="opacity: 0.9; color: {{ contributors|get_item:fragment.contributor.id|get_item:'color' }};" > {{ fragment.fragment }} </p>
+                    {% endfor %}
+                    
+                </div>
+            </div>
+        </div>
+    </article>
 
 {% endblock %}
