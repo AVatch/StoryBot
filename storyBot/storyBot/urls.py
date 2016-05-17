@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 
+admin.site.site_header = 'StoryBot' # http://stackoverflow.com/questions/4938491/django-admin-change-header-django-administration-text
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     
