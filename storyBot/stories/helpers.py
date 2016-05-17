@@ -19,7 +19,8 @@ def chunkString(string, length):
 def createStory( contributor ):
     """
     """
-    story = Story.objects.create( title=generate_title(""), prompt=generate_prompt() )
+    prompt=generate_prompt()
+    story = Story.objects.create( title=generate_title(""), prompt=prompt['prompt'], link=prompt['link'] )
     story.contributors.add(contributor)
     story.save()
     

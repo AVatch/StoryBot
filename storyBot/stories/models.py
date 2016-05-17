@@ -25,6 +25,7 @@ class Story(models.Model):
     complete = models.BooleanField(default=False)
     title = models.CharField(max_length=100, default="An amazing story in search of a title")
     prompt = models.CharField(max_length=250, default="")
+    prompt_link = models.URLField(blank=True)
     contributors = models.ManyToManyField(Contributor)
     
     time_created = models.DateTimeField(auto_now_add=True)

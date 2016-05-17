@@ -1,5 +1,6 @@
-import random
 import os
+import random
+import json
 from django.conf import settings
 
 def generate_alias():
@@ -17,9 +18,9 @@ def generate_title(contents):
     return "An amazing story in search of a title"
 
 def generate_prompt( ):
+    """generates a story prompt
     """
-    """
-    prompt = random.choice(open(os.path.join(settings.BASE_DIR, 'stories/data/prompts.txt')).readlines())
+    prompt =  json.loads( random.choice(open(os.path.join(settings.BASE_DIR, 'stories/data/prompts.json')).readlines()) )
     return prompt
 
     

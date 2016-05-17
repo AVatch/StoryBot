@@ -181,7 +181,7 @@ def handle_leave( contributor ):
     fragment = Fragment.objects.filter(contributor=contributor).filter(complete=False).first()
     if fragment:
         # erase the contents of the fragment
-        fragment.destroy()
+        fragment.delete()
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                    ":|] You just left the story",
                                                    [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
