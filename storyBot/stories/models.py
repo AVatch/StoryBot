@@ -36,6 +36,14 @@ class Story(models.Model):
     
     class Meta:
         verbose_name_plural = "stories"
+    
+    def get_number_of_fragments(self):
+        return self.fragment_set.all().count()
+    get_number_of_fragments.short_description = 'Number of Fragments'
+    
+    def get_number_of_contributors(self):
+        return self.contributors.all().count()
+    get_number_of_contributors.short_description = 'Number of Contributors'
         
 
 class Fragment(models.Model):
