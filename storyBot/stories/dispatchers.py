@@ -83,7 +83,6 @@ def sendBotStructuredButtonMessage(recipient, text, buttons=[]):
     """Send a facebook structured button message
     Use this for prompts and navigation
     """
-
     responseBody = {
         'recipient': { 
             'id': recipient

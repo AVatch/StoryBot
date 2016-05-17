@@ -1,6 +1,7 @@
 import os
 import random
 import json
+import requests
 from django.conf import settings
 
 def generate_alias():
@@ -32,4 +33,11 @@ def generate_prompt( ):
     prompt = json.loads(prompt)
     return prompt
 
-    
+def generate_random_gif():
+    """get random gif from giphy
+    """
+    gif = ""
+    r = requests.get("http://api.giphy.com/v1/stickers/random?api_key=dc6zaTOxFJmzC", 
+                      headers = {'content-type': 'application/json'})
+    gif = r.json()["data"]["url"]
+    return gif

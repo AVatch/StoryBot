@@ -14,12 +14,14 @@
     <title>StoryBot</title>
     
     
+    {% if story %}
     <meta property="og:url"           content="http://www.your-domain.com/your-page.html" />
 	<meta property="og:type"          content="website" />
-	<meta property="og:title"         content="Your Website Title" />
-	<meta property="og:description"   content="Your description" />
-	<meta property="og:image"         content="http://www.your-domain.com/path/image.jpg" />
-
+	<meta property="og:title"         content="{{ story.prompt }}" />
+	<meta property="og:description"   content="{{ description }}" />
+	<meta property="og:image"         content="{{ cover }}" />
+    
+    {% endif %}
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>

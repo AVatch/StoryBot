@@ -19,7 +19,7 @@ import dispatchers
 from .keywords import *
 from .fb_chat_buttons import *
 from .models import Contributor, Fragment, Story
-from .alias_generator import generate_alias, generate_title
+from .alias_generator import generate_alias, generate_title, generate_random_gif
 
 FB_WEBHOOK_CHALLENGE = os.environ.get("FB_WEBHOOK_CHALLENGE")
 FB_APP_ID = os.environ.get("FB_APP_ID")
@@ -93,6 +93,7 @@ class HomePageView(View):
             contributors = {}
             context = {
                 "story": story,
+                "description": "",
                 "fragments": [],
                 "contributors": contributors,
                 "FB_APP_ID": FB_APP_ID,
@@ -100,6 +101,7 @@ class HomePageView(View):
             }
 
             context["fragments"] = Fragment.objects.filter(story=story).order_by('position')
+            context["description"] = context["fragments"][0].fragment[:130] + "..." 
             
             for contributor in story.contributors.all():
                 color = "#%06x" % random.randint(0, 0xFFFFFF)
@@ -134,6 +136,7 @@ class StoryDetailView(View):
         context = {
             "story": story,
             "fragments": [],
+            "cover": generate_random_gif(),
             "contributors": contributors,
             "FB_APP_ID": FB_APP_ID,
             "FB_PAGE_ID": FB_PAGE_ID
@@ -150,7 +153,8 @@ class StoryDetailView(View):
             fragment = story.fragment_set.filter(contributor=contributor).first()
             if fragment:
                 context["contributors"][contributor.id]["alias"] = fragment.alias
-        
+    
+            
     
         return render(request, 'stories/stories.html', context)
 
