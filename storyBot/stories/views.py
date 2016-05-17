@@ -93,8 +93,9 @@ class HomePageView(View):
             contributors = {}
             context = {
                 "story": story,
-                "description": "",
                 "fragments": [],
+                "description": "",
+                "cover": generate_random_gif(),
                 "contributors": contributors,
                 "FB_APP_ID": FB_APP_ID,
                 "FB_PAGE_ID": FB_PAGE_ID
@@ -118,6 +119,8 @@ class HomePageView(View):
             context = {
                 "story": None,
                 "fragments": [],
+                "description": "",
+                "cover": generate_random_gif(),
                 "contributors": [],
                 "FB_APP_ID": FB_APP_ID,
                 "FB_PAGE_ID": FB_PAGE_ID
@@ -136,6 +139,7 @@ class StoryDetailView(View):
         context = {
             "story": story,
             "fragments": [],
+            "description": "",
             "cover": generate_random_gif(),
             "contributors": contributors,
             "FB_APP_ID": FB_APP_ID,
@@ -143,6 +147,7 @@ class StoryDetailView(View):
         }
 
         context["fragments"] = Fragment.objects.filter(story=story).order_by('position')
+        context["description"] = context["fragments"][0].fragment[:130] + "..."
         
         for contributor in story.contributors.all():
             color = "#%06x" % random.randint(0, 0xFFFFFF)
