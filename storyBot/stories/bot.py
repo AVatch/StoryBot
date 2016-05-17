@@ -169,7 +169,7 @@ def handle_done( contributor ):
                 total_turns = min( int(MAX_TURNS_PER_STORY / s.contributors.all().count() ), int(MAX_TURNS_PER_STORY / 2 ) )
                 contributor_fragments_count = s.fragment_set.all().filter(contributor=next_contributor).filter(complete=True).count()
                 
-                dispatchers.sendBotMessage(next_contributor.social_identifier, ":|] You have used " + str( total_turns - contributor_fragments_count ) + " turns left including this one." )            
+                dispatchers.sendBotMessage(next_contributor.social_identifier, ":|] You have " + str( total_turns - contributor_fragments_count ) + " turns remaining, including this one." )            
             
     else:
         dispatchers.sendBotMessage(contributor.social_identifier, ":|] Looks like you havn't written anything!")
