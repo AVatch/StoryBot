@@ -89,28 +89,36 @@ class HomePageView(View):
         # pick a random story and render it
         story = Story.objects.filter(complete=True).order_by('?').first()
         
-        contributors = {}
-        context = {
-            "story": story,
-            "fragments": [],
-            "contributors": contributors,
-            "FB_APP_ID": FB_APP_ID,
-            "FB_PAGE_ID": FB_PAGE_ID
-        }
-
-        context["fragments"] = Fragment.objects.filter(story=story).order_by('position')
-        
-        for contributor in story.contributors.all():
-            color = "#%06x" % random.randint(0, 0xFFFFFF)
-            context["contributors"][contributor.id] = {
-                "color": color,
-                "alias": ""
+        if story:
+            contributors = {}
+            context = {
+                "story": story,
+                "fragments": [],
+                "contributors": contributors,
+                "FB_APP_ID": FB_APP_ID,
+                "FB_PAGE_ID": FB_PAGE_ID
             }
-            fragment = story.fragment_set.filter(contributor=contributor).first()
-            if fragment:
-                context["contributors"][contributor.id]["alias"] = fragment.alias
-        
-        
+
+            context["fragments"] = Fragment.objects.filter(story=story).order_by('position')
+            
+            for contributor in story.contributors.all():
+                color = "#%06x" % random.randint(0, 0xFFFFFF)
+                context["contributors"][contributor.id] = {
+                    "color": color,
+                    "alias": ""
+                }
+                fragment = story.fragment_set.filter(contributor=contributor).first()
+                if fragment:
+                    context["contributors"][contributor.id]["alias"] = fragment.alias
+            
+        else:
+            context = {
+                "story": None,
+                "fragments": [],
+                "contributors": [],
+                "FB_APP_ID": FB_APP_ID,
+                "FB_PAGE_ID": FB_PAGE_ID
+            }
         return render(request, 'stories/stories.html', context)
 
 """Renders the story details page, which is just one story as
