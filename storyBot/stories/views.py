@@ -112,6 +112,7 @@ class HomePageView(View):
                     context["contributors"][contributor.id]["alias"] = fragment.alias
             
         else:
+            # DB is empty and there are no stories
             context = {
                 "story": None,
                 "fragments": [],

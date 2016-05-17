@@ -1,0 +1,107 @@
+.vertical-center {
+    min-height: 100%;  /* Fallback for browsers do NOT support vh unit */
+    min-height: 100vh; /* These two lines are counted as one :-)       */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.horizontal-center {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+
+.story{
+    
+}
+.story h2{
+    font-family: medium-content-sans-serif-font,"Lucida Grande","Lucida Sans Unicode","Lucida Sans",Geneva,Arial,sans-serif;
+    letter-spacing: -.02em;
+    font-weight: 700;
+    font-style: normal;
+    font-size: 52px;
+    margin-left: -3.25px;
+    line-height: 1.04;
+    letter-spacing: -.03em;
+    color: rgba(0,0,0,.8);
+}
+.story h4{
+    font-family: medium-content-sans-serif-font,"Lucida Grande","Lucida Sans Unicode","Lucida Sans",Geneva,Arial,sans-serif;
+    letter-spacing: -.02em;
+    font-weight: 300;
+    font-style: normal;
+    font-size: 28px;
+    margin-left: -1.75px;
+    line-height: 1.22;
+    letter-spacing: -.022em;
+}
+.story p{
+    font-family: medium-content-serif-font,Georgia,Cambria,"Times New Roman",Times,serif;
+    letter-spacing: .01rem;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 21px;
+    line-height: 1.58;
+    letter-spacing: -.003em;
+}
+
+
+
+.fragment h4 {
+    border-bottom: 1px dashed black;
+}
+.fragment p{
+    display: inline !important;
+}
+
+
+.about{
+    padding: 30px;
+    width: 100%;
+}
+.about p{
+    text-align: center;
+}
+
+.messege-us-btn-container{
+    display: block;
+    height: 21px;   
+}
+
+
+.legend{
+    width: 300px;    
+}
+
+.legend div{
+    margin-bottom: 5px;
+}
+
+.legend-color{
+    display: block;
+    float: left;
+    width: 25px;
+    height: 25px;
+    border-radius: 25px;
+    opacity: 0.4;
+    margin-right: 15px;
+    margin-top: 10px;
+}
+.legend-text{
+    float: left;
+    font-family: medium-content-sans-serif-font,"Lucida Grande","Lucida Sans Unicode","Lucida Sans",Geneva,Arial,sans-serif;
+    letter-spacing: -.02em;
+    font-weight: 300;
+    font-style: normal;
+    font-size: 28px;
+    margin-left: -1.75px;
+    line-height: 1.22;
+    letter-spacing: -.022em;
+    
+}
