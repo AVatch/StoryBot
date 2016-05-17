@@ -20,7 +20,7 @@ def createStory( contributor ):
     """
     """
     prompt=generate_prompt()
-    story = Story.objects.create( title=generate_title(""), prompt=prompt['prompt'], link=prompt['link'] )
+    story = Story.objects.create( title=generate_title(""), prompt=prompt['prompt'], prompt_link=prompt['link'] )
     story.contributors.add(contributor)
     story.save()
     

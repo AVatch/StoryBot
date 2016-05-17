@@ -20,7 +20,14 @@ def generate_title(contents):
 def generate_prompt( ):
     """generates a story prompt
     """
-    prompt =  json.loads( random.choice(open(os.path.join(settings.BASE_DIR, 'stories/data/prompts.json')).readlines()) )
+    prompt = random.choice(
+            open(
+                os.path.join(
+                    settings.BASE_DIR, 'stories/data/prompts.json'
+                )
+            ).readlines()
+        ).strip()[:-1]
+    prompt = json.loads(prompt)
     return prompt
 
     
