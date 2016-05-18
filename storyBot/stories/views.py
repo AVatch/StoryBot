@@ -25,6 +25,20 @@ from .alias_generator import generate_alias, generate_title, generate_random_gif
 FB_WEBHOOK_CHALLENGE = os.environ.get("FB_WEBHOOK_CHALLENGE")
 FB_APP_ID = os.environ.get("FB_APP_ID")
 FB_PAGE_ID = os.environ.get("FB_PAGE_ID")
+FB_TOKEN = os.environ.get("FB_TOKEN")
+
+
+def get_user_fb_info(fb_id):
+    """returns the users fb info
+    ref: https://developers.facebook.com/docs/messenger-platform/send-api-reference#user_profile_request
+    """
+    r = requests.get('https://graph.facebook.com/v2.6/' + str(fb_id),
+                     params={
+                         'fields': 'first_name,last_name,profile_pic,locale,timezone,gender',
+                         'access_token': FB_TOKEN
+                     })
+    return r.json()
+
 
 
 @register.filter
@@ -33,10 +47,6 @@ def get_item(dictionary, key):
         return dictionary.get(key)
     else:
         return None
-
-
-
-
 
 """Primary webhook endpoint where the bot logic resides
 """
@@ -59,6 +69,16 @@ class BotWebHookHandler(APIView):
             contributor, created = Contributor.objects.get_or_create(social_identifier=str( event.get('sender').get('id') ) )
             
             if created:
+                fb_info = get_user_fb_info( contributor.social_identifier )
+                
+                contributor.profile_pic = fb_info.get('profile_pic')
+                contributor.first_name = fb_info.get('first_name')
+                contributor.last_name = fb_info.get('last_name')
+                contributor.locale = fb_info.get('locale')
+                contributor.gender = fb_info.get('gender')
+                contributor.timezone = fb_info.get('timezone')
+                contributor.save()
+                
                 dispatchers.sendBotMessage(contributor.social_identifier, "Thanks for joining StoryBot!")
                 dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                    "Let's get started.",
