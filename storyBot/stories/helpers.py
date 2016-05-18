@@ -88,9 +88,7 @@ def leaveStory(contributor, story):
 def updateStory(contributor, content):
     """
     """
-    print "UPDATING"*10
     fragment = contributor.get_last_fragment(complete=False)
-    print fragment
     if fragment:
         fragment.fragment = fragment.fragment + " " + content
         fragment.last_edit = content

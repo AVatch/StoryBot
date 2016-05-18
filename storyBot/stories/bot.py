@@ -173,7 +173,7 @@ def handle_done( contributor ):
         
 
 def handle_undo( contributor ):
-    if contributor.state == "writing":
+    if contributor.state == WRITING:
         fragment = contributor.fragment_set.all().order_by('time_created').last()
         if fragment and fragment.last_edit:
             f = helpers.undoLastEdit( contributor )
@@ -216,7 +216,7 @@ def handle_leave( contributor ):
 def handle_browse( contributor ):
     """Handle the case that the user is attempting to read a random story 
     """
-    contributor.state = 'browsing'
+    contributor.state = BROWSING
     contributor.save()
     
     # get a random story
