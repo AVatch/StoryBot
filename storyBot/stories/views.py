@@ -16,6 +16,8 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from errors.models import Error
+
 import bot
 import dispatchers
 from .keywords import *
@@ -63,40 +65,47 @@ class BotWebHookHandler(APIView):
     def post(self, request, format=None):
         """Main entry point for Messenger conversations
         """
-        messenger_events = request.data.get('entry')[0].get('messaging')
         
-        for event in messenger_events:
-            
-            contributor, created = Contributor.objects.get_or_create(social_identifier=str( event.get('sender').get('id') ) )
-            contributor.last_active = timezone.now()
-            contributor.save()
-                        
-            if created:
-                fb_info = get_user_fb_info( contributor.social_identifier )
+        try:
+            messenger_events = request.data.get('entry')[0].get('messaging')
+        
+            for event in messenger_events:
                 
-                contributor.profile_pic = fb_info.get('profile_pic')
-                contributor.first_name = fb_info.get('first_name')
-                contributor.last_name = fb_info.get('last_name')
-                contributor.locale = fb_info.get('locale')
-                contributor.gender = fb_info.get('gender')
-                contributor.timezone = fb_info.get('timezone')
+                contributor, created = Contributor.objects.get_or_create(social_identifier=str( event.get('sender').get('id') ) )
+                contributor.last_active = timezone.now()
                 contributor.save()
-                
-                dispatchers.sendBotMessage(contributor.social_identifier, "Thanks for joining StoryBot!")
-                dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                   "Let's get started.",
-                                                   [BUTTON_JOIN, BUTTON_BROWSE])
-                break  # we want to let the user input a choice            
-        
-            if event.get('postback') and event.get('postback').get('payload'):
-                """Handle PB postback style messages
-                """
-                bot.process_postback_message( contributor, event.get('postback').get('payload') )
+                            
+                if created:
+                    fb_info = get_user_fb_info( contributor.social_identifier )
+                    
+                    contributor.profile_pic = fb_info.get('profile_pic')
+                    contributor.first_name = fb_info.get('first_name')
+                    contributor.last_name = fb_info.get('last_name')
+                    contributor.locale = fb_info.get('locale')
+                    contributor.gender = fb_info.get('gender')
+                    contributor.timezone = fb_info.get('timezone')
+                    contributor.save()
+                    
+                    dispatchers.sendBotMessage(contributor.social_identifier, "Thanks for joining StoryBot!")
+                    dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                                    "Let's get started.",
+                                                    [BUTTON_JOIN, BUTTON_BROWSE])
+                    break  # we want to let the user input a choice            
             
-            if event.get('message') and event.get('message').get('text'):
-                """Handle messages with text
-                """
-                bot.process_raw_message( contributor, event.get('message').get('text') )
+                if event.get('postback') and event.get('postback').get('payload'):
+                    """Handle PB postback style messages
+                    """
+                    bot.process_postback_message( contributor, event.get('postback').get('payload') )
+                
+                if event.get('message') and event.get('message').get('text'):
+                    """Handle messages with text
+                    """
+                    bot.process_raw_message( contributor, event.get('message').get('text') )
+            
+        except Exception as e:
+            Error.objects.create(msg=str(e))
+        
+        
    
         """Return a 200 to the messenger provider 
         """
