@@ -32,9 +32,7 @@ def handle_join( contributor ):
                                                         "title": "Read the story",
                                                         "url": settings.BASE_URL + "/stories/" + str(fragment.story.id)
                                                     }, BUTTON_LEAVE])
-    else:
-        dispatchers.sendBotMessage(contributor.social_identifier, ":|] Let's find a story for you to join!")
-                
+    else:        
         available_story = Story.objects.filter(complete=False) \
                                        .filter(full=False) \
                                        .exclude(contributors__in=[contributor]) \
@@ -50,7 +48,7 @@ def handle_join( contributor ):
             
             # tell the user they are paired up
             dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                        ":|] We've found a story for you to join! For this storyYou will be called " + contributor.temp_alias,
+                                                        ":|] We've found a story for you to join! For this story you will be called " + contributor.temp_alias,
                                                         [{
                                                                 "type": "web_url",
                                                                 "title": "Read the story",
@@ -66,7 +64,7 @@ def handle_join( contributor ):
                 fragment.alias = contributor.temp_alias
                 fragment.save()
                 
-                dispatchers.sendBotMessage(contributor.social_identifier, ":|] It's your turn, send us a message to add to the story!")
+                dispatchers.sendBotMessage(contributor.social_identifier, ":|] It's your turn, send us a message to add it to the story!")
             else:
                 dispatchers.sendBotMessage(contributor.social_identifier, ":|] We'll let you know when it's your turn!")
             
@@ -315,12 +313,6 @@ def process_raw_message( contributor, payload ):
     else:
         if contributor.state == WRITING:
             fragment = helpers.updateStory( contributor, payload )
-            
-            print "*"*50
-            print contributor
-            print fragment
-            print "*"*50
-            
             story = fragment.story      
             dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                        ":|] Story updated! (You can keep writing by sending more messages)",
