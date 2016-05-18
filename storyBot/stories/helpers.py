@@ -49,7 +49,7 @@ def joinStory(contributor, story):
     the contributor to fill in
     """
     # get the next availible story fragment
-    next_story_fragment = story.fragment_set.all().filter(complete=False).order_by('position').first()
+    next_story_fragment = story.fragment_set.all().filter(contributor__isnull=True).order_by('position').first()
     # and update it with the relevent info
     next_story_fragment.alias = generate_alias()
     next_story_fragment.contributor = contributor

@@ -78,6 +78,29 @@ def sendBotStructuredGenericMessage(recipient, title, item_url=None, image_url=N
                   params = { 'access_token': FB_TOKEN },
                   headers = {'content-type': 'application/json'},
                   data = json.dumps(responseBody) )
+
+def sendBotStructuredImageMessage(recipient, img_url):
+    """Send a facebook structured image message
+    Use this for prompts and navigation
+    """
+    responseBody = {
+        'recipient': { 
+            'id': recipient
+        },
+        "message": {
+            "attachment": {
+                "type": "image",
+                "payload": {
+                    "url":img_url
+                }
+            }
+        }         
+    }
+
+    r = requests.post(FB_URL, 
+                  params = { 'access_token': FB_TOKEN },
+                  headers = {'content-type': 'application/json'},
+                  data = json.dumps(responseBody) )
     
 def sendBotStructuredButtonMessage(recipient, text, buttons=[]):
     """Send a facebook structured button message
