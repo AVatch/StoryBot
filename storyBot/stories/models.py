@@ -28,6 +28,8 @@ class Contributor(models.Model):
     gender = models.CharField(max_length=100, blank=True, null=True)
     timezone = models.IntegerField(blank=True, null=True)
     
+    temp_alias = models.CharField(max_length=100, blank=True, null=True)
+    
     state = models.CharField(max_length=2, choices=CONTRIBUTOR_STATES, default=BROWSING)
 
     last_active = models.DateTimeField(auto_now_add=True)

@@ -39,6 +39,7 @@ def createStory( contributor ):
             f.save()
             # update the state of the contributor
             contributor.state = WRITING
+            contributor.temp_alias = f.alias
             contributor.save()
 
     return story
@@ -48,12 +49,6 @@ def joinStory(contributor, story):
     """given a contributor and a story, it finds the next available slot for
     the contributor to fill in
     """
-    # get the next availible story fragment
-    next_story_fragment = story.fragment_set.all().filter(contributor__isnull=True).order_by('position').first()
-    # and update it with the relevent info
-    next_story_fragment.alias = generate_alias()
-    next_story_fragment.contributor = contributor
-    next_story_fragment.save()
             
     # update the state of the contributor
     contributor.state = BROWSING
@@ -69,13 +64,18 @@ def joinStory(contributor, story):
         story.full = True
         story.save()
     
-    return story, next_story_fragment
-    
+    return story
 
 
+def completeFragment(contributor, story):
+    """
+    """
+    pass
 
-
-
+def prepareNextStoryFragment(contributor, story):
+    """
+    """
+    pass
 
 
 
@@ -88,11 +88,15 @@ def leaveStory(contributor, story):
 def updateStory(contributor, content):
     """
     """
-    fragment = contributor.fragment_set.all().filter(complete=False).first()
+    print "UPDATING"*10
+    fragment = contributor.get_last_fragment(complete=False)
+    print fragment
     if fragment:
         fragment.fragment = fragment.fragment + " " + content
         fragment.last_edit = content
         fragment.save()
+    else:
+        pass
     return fragment
     
 
@@ -100,7 +104,7 @@ def updateStory(contributor, content):
 def undoLastEdit(contributor):
     """
     """
-    fragment = contributor.fragment_set.all().filter(complete=False).first()
+    fragment = contributor.get_last_fragment(complete=False)
     if fragment:
         fragment.fragment = fragment.fragment[:-len(fragment.last_edit)]
         fragment.last_edit = ""
