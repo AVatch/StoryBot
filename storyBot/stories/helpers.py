@@ -1,7 +1,7 @@
 from .fb_chat_buttons import *
 from .alias_generator import *
 from .models import Contributor, Story, Fragment
-
+from .models import BROWSING, WRITING, NAMING, SPEAKING
 
 def hasNumber(string):
     """check if a string contains a number
@@ -16,42 +16,47 @@ def chunkString(string, length):
 
 
 def createStory( contributor ):
+    """create a story with an initial contributor and 
+    a set of fragments
     """
-    """
-    prompt=generate_prompt()
-    story = Story.objects.create( title=generate_title(""), prompt=prompt['prompt'], prompt_link=prompt['link'] )
+    # generate a prompt
+    generated_prompt = generate_prompt()
+    
+    # create the story
+    story = Story.objects.create( prompt=generated_prompt['prompt'], prompt_link=generated_prompt['link'] )
     story.contributors.add(contributor)
     story.save()
     
-    # create a new fragment for the story
-    fragment = Fragment.objects.create(story=story, 
-                                       fragment="",
-                                       alias=generate_alias(),
-                                       position=0, 
-                                       contributor=contributor)
-                        
-    # update the state of the contributor
-    contributor.state = "writing"
-    contributor.save()  
-    
-    return story, fragment
+    # fill it up with fragments
+    for i in range( story.num_of_turns):
+        f = Fragment.objects.create(story=story,
+                                    position=i)
+        if i == 0:
+            # give the contributor starting the story, the first
+            # part
+            f.contributor = contributor
+            f.alias = generate_alias()
+            f.save()
+            # update the state of the contributor
+            contributor.state = WRITING
+            contributor.save()
+
+    return story
     
 
-def joinStory(contributor, story, alias=None):
+def joinStory(contributor, story):
+    """given a contributor and a story, it finds the next available slot for
+    the contributor to fill in
     """
-    """
-    # create a fragment for the story
-    
-    if alias is None:
-        alias = generate_alias()
-    
-    fragment = Fragment.objects.create(story=story, 
-                                       fragment="",
-                                       alias=alias, 
-                                       position=story.fragment_set.count(), 
-                                       contributor=contributor)
+    # get the next availible story fragment
+    next_story_fragment = story.fragment_set.all().filter(complete=False).order_by('position').first()
+    # and update it with the relevent info
+    next_story_fragment.alias = generate_alias()
+    next_story_fragment.contributor = contributor
+    next_story_fragment.save()
+            
     # update the state of the contributor
-    contributor.state = "browsing"
+    contributor.state = BROWSING
     contributor.save()
     
     # update the story contributors
@@ -59,8 +64,20 @@ def joinStory(contributor, story, alias=None):
         story.contributors.add(contributor)
         story.save()
     
-    return story, fragment
+    # check if the story should be set to full
+    if story.contributors.all().count() == story.num_of_contributors:
+        story.full = True
+        story.save()
     
+    return story, next_story_fragment
+    
+
+
+
+
+
+
+
 
 def leaveStory(contributor, story):
     """

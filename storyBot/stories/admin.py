@@ -18,7 +18,7 @@ class StoryAdmin(admin.ModelAdmin):
     inlines = [
         FragmentInline,
     ]
-    list_display = ('complete', 'id', 'prompt', 'get_number_of_fragments', 'get_number_of_contributors', 'time_created', 'time_modified')
+    list_display = ('complete', 'id', 'prompt', 'get_number_of_fragments', 'get_number_of_contributors', 'full', 'time_created', 'time_modified')
 
 admin.site.register(Story, StoryAdmin)
 

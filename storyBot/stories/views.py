@@ -10,6 +10,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import View
 from django.template.defaulttags import register
 from django.conf import settings
+from django.utils import timezone
 
 from rest_framework import status
 from rest_framework.views import APIView
@@ -67,7 +68,9 @@ class BotWebHookHandler(APIView):
         for event in messenger_events:
             
             contributor, created = Contributor.objects.get_or_create(social_identifier=str( event.get('sender').get('id') ) )
-            
+            contributor.last_active = timezone.now()
+            contributor.save()
+                        
             if created:
                 fb_info = get_user_fb_info( contributor.social_identifier )
                 

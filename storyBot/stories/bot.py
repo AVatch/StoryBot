@@ -6,13 +6,13 @@ from django.conf import settings
 from .keywords import *
 from .fb_chat_buttons import *
 from .models import Contributor, Story, Fragment
-
+from .models import BROWSING, WRITING, NAMING, SPEAKING
+from .models import NUM_STORY_CONTRIBUTORS, NUM_TURNS_PER_CONTRIBUTOR
+  
 import helpers
 import dispatchers
 
-MAX_STORY_CONTRIBUTORS = 2
-MAX_STORY_FRAGMENTS_PER_CONTRIBUTOR = 4
-MAX_TURNS_PER_STORY = 8
+
 
 
 def handle_join( contributor ):
@@ -20,11 +20,10 @@ def handle_join( contributor ):
     """
     # First let's check to make sure the user is not currently working on
     # a story
-    if Fragment.objects.filter(contributor=contributor).filter(complete=False).count() > 0:
-        contributor.state = 'writing'
-        contributor.save()
-        fragment = Fragment.objects.filter(contributor=contributor).filter(complete=False).first()
-
+    if contributor.state == WRITING:
+        fragment = contributor.get_last_fragment(complete=False)
+        
+        # remind the user what they are working on
         dispatchers.sendBotMessage(contributor.social_identifier, ":|] Looks like you are in the middle of a story!")
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                    ":|] Your alias for this story is " + fragment.alias,
@@ -34,22 +33,20 @@ def handle_join( contributor ):
                                                         "url": settings.BASE_URL + "/stories/" + str(fragment.story.id)
                                                     }, BUTTON_LEAVE])
     else:
-        dispatchers.sendBotMessage(contributor.social_identifier, ":|] Great, let's find a story for you to join!")
-        availible_story = Story.objects.annotate(num_contributors=Count('contributors')) \
-                                       .filter(num_contributors__lte=MAX_STORY_CONTRIBUTORS-1) \
-                                       .filter(complete=False) \
+        dispatchers.sendBotMessage(contributor.social_identifier, ":|] Let's find a story for you to join!")
+        
+        available_story = Story.objects.filter(complete=False) \
+                                       .filter(full=False) \
                                        .exclude(contributors__in=[contributor]) \
-                                       .order_by('time_created').first()
+                                       .order_by('time_created') \
+                                       .first()
         
-        if availible_story:
-            print "JOINING: ", availible_story
-        
+        if available_story:
             # join the story
-            s, f = helpers.joinStory(contributor, availible_story)
+            s, f = helpers.joinStory(contributor, available_story)
+            
             # tell the user they are paired up
             dispatchers.sendBotMessage(contributor.social_identifier, ":|] We found a story for you to join!")
-            dispatchers.sendBotMessage(contributor.social_identifier, ":|] Here is the prompt if you wish to follow it.")
-            dispatchers.sendBotMessage(contributor.social_identifier, "o.O " + availible_story.prompt)
             dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                         ":|] Your alias for this story will be " + f.alias,
                                                         [{
@@ -58,29 +55,27 @@ def handle_join( contributor ):
                                                                 "url": settings.BASE_URL + "/stories/" + str(s.id)
                                                             }, BUTTON_LEAVE])
                                                             
-            dispatchers.sendBotMessage(contributor.social_identifier, ":|] You will have " + str(MAX_STORY_FRAGMENTS_PER_CONTRIBUTOR) + " turns in this story!")
+            dispatchers.sendBotMessage(contributor.social_identifier, ":|] You will have " + str(NUM_TURNS_PER_CONTRIBUTOR) + " turns in this story!")
             
-            # check if everything else is complete. if so you are up!
-            if s.fragment_set.all().filter(complete=True).count() == s.fragment_set.all().count() - 1:
-                contributor.state = "writing"
-                contributor.save()
-                
-            
-                
-                dispatchers.sendBotMessage(contributor.social_identifier, ":|] It looks like it is your turn!")
-            else:
-                dispatchers.sendBotMessage(contributor.social_identifier, ":|] We will notify you when updates are made and when it is your turn!")
+            # # check if everything else is complete. if so you are up!
+            # if s.fragment_set.all().filter(complete=True).count() == s.fragment_set.all().count() - 1:
+            #     contributor.state = "writing"
+            #     contributor.save()
+            #     dispatchers.sendBotMessage(contributor.social_identifier, ":|] It looks like it is your turn!")
+            # else:
+            #     dispatchers.sendBotMessage(contributor.social_identifier, ":|] We will notify you when updates are made and when it is your turn!")
             
         else:
             # create a new one
-            s, f = helpers.createStory(contributor)
+            s = helpers.createStory(contributor)
+            f = s.fragment_set.all().order_by('position').first()
             # the story and fragment are created, so tell the user to start the story
             dispatchers.sendBotMessage(contributor.social_identifier, ":|] You're starting a new story, you can start it!")
             dispatchers.sendBotMessage(contributor.social_identifier, ":|] For this we'll call you " + f.alias)
-            dispatchers.sendBotMessage(contributor.social_identifier, ":|] Here is some inspiration if you need it!")
-            dispatchers.sendBotMessage(contributor.social_identifier, "o.O " + s.prompt)
+            # dispatchers.sendBotMessage(contributor.social_identifier, ":|] Here is some inspiration if you need it!")
+            # dispatchers.sendBotMessage(contributor.social_identifier, "o.O " + s.prompt)
             
-            dispatchers.sendBotMessage(contributor.social_identifier, ":|] You will have " + str(MAX_STORY_FRAGMENTS_PER_CONTRIBUTOR) + " turns in this story!")
+            dispatchers.sendBotMessage(contributor.social_identifier, ":|] You will have " + str(NUM_TURNS_PER_CONTRIBUTOR) + " turns in this story!")
             dispatchers.sendBotMessage(contributor.social_identifier, ":|] You can start writing your part!")
             
 
