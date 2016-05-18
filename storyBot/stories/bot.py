@@ -75,7 +75,7 @@ def handle_join( contributor ):
             # the story and fragment are created, so tell the user to start the story
             dispatchers.sendBotMessage(contributor.social_identifier, ":|] You're starting a new story!")
             dispatchers.sendBotMessage(contributor.social_identifier, ":|] You're alias for this story will be' " + f.alias + " and will have " + str(NUM_TURNS_PER_CONTRIBUTOR) + " turns.")
-                        
+
             dispatchers.sendBotMessage(contributor.social_identifier, ":|] Here is some inspiration if you need it!")
             dispatchers.sendBotMessage(contributor.social_identifier, "o.O " + s.prompt)
             dispatchers.sendBotMessage(contributor.social_identifier, ":|] You can start writing.")
@@ -172,13 +172,14 @@ def handle_done( contributor ):
 
 def handle_undo( contributor ):
     if contributor.state == WRITING:
-        fragment = contributor.fragment_set.all().order_by('time_created').last()
+        fragment = contributor.get_last_fragment()
+        
         if fragment and fragment.last_edit:
             f = helpers.undoLastEdit( contributor )
             dispatchers.sendBotMessage( contributor.social_identifier, ":|] Undo done, here is what you have so far" )
             dispatchers.readBackFragment( contributor, f )
         else:
-            dispatchers.sendBotMessage( contributor.social_identifier, ":|] I'm only starting to learn how to go back in time, so undo is limited to one edit at a time")
+            dispatchers.sendBotMessage( contributor.social_identifier, ":|] Sorry, I can't undo this.")
         
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                    ":|] What would you like to do now?",
@@ -196,10 +197,20 @@ def handle_undo( contributor ):
 def handle_leave( contributor ):
     """Handle the case that the user is attempting to leave the story
     """
-    fragment = Fragment.objects.filter(contributor=contributor).filter(complete=False).first()
+    fragment = contributor.fragment_set.all().order_by('time_modified').last()
+    
+    print fragment
+    
     if fragment:
         # erase the contents of the fragment
         fragment.delete()
+        
+        # remove the person from the story
+        story = fragment.story
+        story.full = False
+        story.contributors.remove(contributor)
+        story.save()
+        
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                    ":|] You just left the story",
                                                    [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])

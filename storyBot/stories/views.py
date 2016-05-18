@@ -103,7 +103,7 @@ class BotWebHookHandler(APIView):
                     bot.process_raw_message( contributor, event.get('message').get('text') )
             
         except Exception as e:
-            Error.objects.create(msg=str(e))
+            Error.objects.create(message=str(e))
         
         
    
