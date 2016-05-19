@@ -25,7 +25,7 @@ def calculate_num_of_turns( ):
     """
     LOWER_BOUND = 2
     UPPER_BOUND = 4
-    return choice(range(LOWER_BOUND, UPPER_BOUND, 2))
+    return choice(range(LOWER_BOUND, UPPER_BOUND, 2)) # ensure its even
 
 
 class Contributor(models.Model):
@@ -43,6 +43,7 @@ class Contributor(models.Model):
     state = models.CharField(max_length=2, choices=CONTRIBUTOR_STATES, default=BROWSING)
 
     last_active = models.DateTimeField(auto_now_add=True)
+    
 
     time_created = models.DateTimeField(auto_now_add=True)
     time_modified = models.DateTimeField(auto_now=True)
@@ -56,8 +57,20 @@ class Contributor(models.Model):
         self.save()
 
     def get_last_fragment(self, complete=False):
-        return Fragment.objects.filter(contributor=self).filter(complete=complete).order_by('time_modified').first()
+        return Fragment.objects.filter(contributor=self).latest('time_modified')
     
+    def is_busy(self):
+        """determine if the contributor is currently writing or part of a story
+        that is not done
+        """
+        last_fragment = self.get_last_fragment()
+        if last_fragment:
+            last_story = last_fragment.story
+            return (self.state is WRITING) or (not last_fragment.complete or not last_story.complete)
+        else:
+            return False
+             
+        
     def __str__(self):
         return '%s: %s' % ( self.first_name, self.last_name )
 
@@ -190,6 +203,7 @@ class Fragment(models.Model):
     
     def undo_edit(self):
         self.fragment = self.fragment[:-len(self.last_edit)]
+        self.last_edit = ""
         self.save()
 
     def __str__(self):

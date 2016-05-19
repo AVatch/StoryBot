@@ -21,7 +21,7 @@ def handle_join( contributor ):
     # First let's check to make sure the user is not currently working on
     # a story
     
-    if contributor.state == WRITING:
+    if contributor.is_busy():
         fragment = contributor.get_last_fragment(complete=False)
         if fragment:
             # remind the user what they are working on
@@ -97,11 +97,6 @@ def handle_done( contributor ):
             dispatchers.notifyOnStoryUpdate(story)
             # now figure out the next person who is up
             next_contributor = story.get_next_contributor()
-            
-            print "THE CURRENT CONTRIBUTOR IS "
-            print contributor
-            print "THE NEXT CONTRIBUTOR IS "
-            print next_contributor
             
             if next_contributor and next_contributor.id != contributor.id:
                 next_fragment = story.associate_fragment_with_contributor(next_contributor)
