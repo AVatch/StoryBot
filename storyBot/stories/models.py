@@ -5,7 +5,7 @@ from django.db import models
 
 from content_generators import generate_alias
 
-DEFAULT_STORY_TITLE = "An amazing story in search of a title"
+DEFAULT_STORY_TITLE = "An amazing story in search for a title"
 NUM_STORY_CONTRIBUTORS = 2
 
 BROWSING = 'BR'
@@ -139,6 +139,9 @@ class Story(models.Model):
             return next_availible_story_fragment  
         else:
             return None
+    
+    def get_last_incomplete_fragment(self):
+        return self.fragment_set.filter(complete=False).order_by('position').first()
     
     def get_last_complete_fragment(self):
         return self.fragment_set.filter(complete=True).order_by('position').last()

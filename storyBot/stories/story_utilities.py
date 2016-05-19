@@ -1,4 +1,7 @@
-import datetime 
+from datetime import timedelta
+
+from django.utils import timezone
+
 from .fb_chat_buttons import *
 from .content_generators import *
 from .models import Contributor, Story, Fragment
@@ -55,3 +58,25 @@ def undoLastEdit(contributor):
     if fragment:
         fragment.undo_edit()
     return fragment 
+
+
+def checkForStaleContributors( ):
+    """checks stories for any contributors which have not been active
+    for a period of time and prompts them to act
+    """
+    TIME_DELTA = timedelta(hours=2)
+    now = timezone.now()
+    
+    unfinished_stories = Story.objects.all().filter(complete=False).order_by('time_created')
+    contributors_to_message = []
+    
+    for story in unfinished_stories:
+        # get the last fragment in the story
+        last_incomplete_fragment = story.get_last_incomplete_fragment()
+        if last_incomplete_fragment:
+            # check if the user has been active
+            contributor_last_active = last_incomplete_fragment.contributor.last_active  
+            if ( now - contributor_last_active ) > TIME_DELTA:
+                contributors_to_message.append( contributor_last_active )
+                
+    return contributors_to_message
