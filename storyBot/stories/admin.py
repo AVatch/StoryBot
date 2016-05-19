@@ -5,7 +5,7 @@ from .models import Contributor, Fragment, Story
 
 class ContributorAdmin(admin.ModelAdmin):
     model = Contributor
-    list_display = ('social_identifier', 'state', 'first_name', 'last_name', 'locale', 'gender', 'timezone')
+    list_display = ('social_identifier', 'state', 'first_name', 'last_name', 'locale', 'gender', 'stale', 'timezone')
 admin.site.register(Contributor, ContributorAdmin)
 
 

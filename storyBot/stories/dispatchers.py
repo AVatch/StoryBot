@@ -202,7 +202,7 @@ def remindInactiveContributor( contributor ):
     last_fragment = contributor.get_last_fragment()
     last_story = last_fragment.story
     sendBotStructuredButtonMessage(contributor.social_identifier,
-                                       ":|] Hey, it's still your turn! Don't keep the others waiting.'",
+                                       ":|] Hey, it's still your turn! Don't keep the others waiting.",
                                        [{
                                             "type": "web_url",
                                             "title": "Read the story",
@@ -211,7 +211,11 @@ def remindInactiveContributor( contributor ):
                                         BUTTON_DONE,
                                         BUTTON_LEAVE])
 
-def notifyDroppedContributor( contributor ):
+def notifyKickedContributor( contributor ):
     """notifies a contributor that they are dropped from the story
     """
-    pass        
+    sendBotStructuredButtonMessage(contributor.social_identifier,
+                                       ":|] Hey, you've been inactive for too long, so we've removed you from the story. You still will be notified when the story is done!",
+                                       [BUTTON_JOIN,
+                                        BUTTON_READ,
+                                        BUTTON_HISTORY])        

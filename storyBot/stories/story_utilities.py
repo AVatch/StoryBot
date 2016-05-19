@@ -4,7 +4,7 @@ from django.utils import timezone
 
 from .fb_chat_buttons import *
 from .content_generators import *
-from .models import Contributor, Story, Fragment
+from .models import Contributor, Story, Fragment, WRITING
 
 def createStory( contributor ):
     """create a story with an initial contributor and 
@@ -68,16 +68,19 @@ def checkForStaleContributors( ):
     TIME_DELTA = timedelta(minutes=1)
     now = timezone.now()
     
-    unfinished_stories = Story.objects.all().filter(complete=False).order_by('time_created')
     contributors_to_message = []
-    
-    for story in unfinished_stories:
-        # get the last fragment in the story
-        last_incomplete_fragment = story.get_last_incomplete_fragment()
-        if last_incomplete_fragment:
-            # check if the user has been active
-            contributor_last_active = last_incomplete_fragment.contributor.last_active  
-            if ( now - contributor_last_active ) > TIME_DELTA:
-                contributors_to_message.append( last_incomplete_fragment.contributor )
-                
+    writing_contributors = Contributor.objects.all().filter(state=WRITING).order_by('last_active')
+
+    for contributor in writing_contributors:
+        if ( now - contributor.last_active ) > TIME_DELTA:
+            contributors_to_message.append( contributor )            
     return contributors_to_message
+
+def kickStaleContributor( contributor ):
+    """kicks a contributor from the story since they have been inactive
+    """
+    last_fragment = contributor.get_last_fragment()
+    last_story = last_fragment.story
+    
+    # remove the contributor from the story 
+    last_story.remove_contributor( contributor )

@@ -129,6 +129,15 @@ class Story(models.Model):
             
             # commit the change
             self.save()
+            
+            # update the contributor
+            contributor.mark_active()
+            contributor.update_state(BROWSING)
+            contributor.reset_temp_alias()
+            
+            # remove the fragment as it is no longer valid
+            fragment = contributor.get_last_fragment()
+            fragment.delete()
     
     def populate_with_fragments(self):
         for i in range(self.num_of_turns):

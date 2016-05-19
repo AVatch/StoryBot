@@ -25,7 +25,7 @@ from .keywords import *
 from .fb_chat_buttons import *
 from .models import Contributor, Fragment, Story
 from .alias_generator import generate_alias, generate_title, generate_random_gif
-from .story_utilities import checkForStaleContributors
+from .story_utilities import checkForStaleContributors, kickStaleContributor
 
 FB_WEBHOOK_CHALLENGE = os.environ.get("FB_WEBHOOK_CHALLENGE")
 FB_APP_ID = os.environ.get("FB_APP_ID")
@@ -103,9 +103,7 @@ class BotWebHookHandler(APIView):
                 """Handle messages with text
                 """
                 bot.process_raw_message( contributor, event.get('message').get('text') )
-        
-        
-   
+           
         """Return a 200 to the messenger provider 
         """
         return Response( status=status.HTTP_200_OK )
@@ -127,6 +125,9 @@ class CleanupView(APIView):
                 # this is the 2nd time we are asking them to write
                 # so kick them
                 print "KICK"*50
+                kickStaleContributor( contributor )
+                dispatchers.notifyKickedContributor( contributor )
+                
             else:
                 # notify them to act
                 print "NOTIFY"
