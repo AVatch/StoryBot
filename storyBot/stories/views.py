@@ -7,6 +7,7 @@ import requests
 
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import View
 from django.template.defaulttags import register
 from django.conf import settings
@@ -15,8 +16,8 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
-from errors.models import Error
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 import bot
 import dispatchers
@@ -24,6 +25,7 @@ from .keywords import *
 from .fb_chat_buttons import *
 from .models import Contributor, Fragment, Story
 from .alias_generator import generate_alias, generate_title, generate_random_gif
+from .story_utilities import checkForStaleContributors
 
 FB_WEBHOOK_CHALLENGE = os.environ.get("FB_WEBHOOK_CHALLENGE")
 FB_APP_ID = os.environ.get("FB_APP_ID")
@@ -109,6 +111,29 @@ class BotWebHookHandler(APIView):
         return Response( status=status.HTTP_200_OK )
 
 
+"""Calls the cleanup function which identified any stale contributors and
+drops them
+"""
+class CleanupView(APIView):
+    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    permission_classes = (IsAuthenticated,)
+    
+    def post(self, request, format=None):
+        stale_contributors = checkForStaleContributors()
+        print "STALE CONTRIBUTORS"
+        print stale_contributors
+        for contributor in stale_contributors:
+            if contributor.stale:
+                # this is the 2nd time we are asking them to write
+                # so kick them
+                print "KICK"*50
+            else:
+                # notify them to act
+                print "NOTIFY"
+                dispatchers.remindInactiveContributor( contributor )
+                # mark them stale for next time
+                contributor.mark_stale()
+        return Response( { }, status=status.HTTP_200_OK )
 
 
 """Renders the landing page, which is just a random story

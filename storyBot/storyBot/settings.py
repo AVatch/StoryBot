@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     
     'stories',
-    'errors'
 ]
 
 MIDDLEWARE_CLASSES = [

@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from django.views.generic import TemplateView
-from .views import BotWebHookHandler, HomePageView, StoryDetailView, AboutPageView
+from .views import BotWebHookHandler, CleanupView, HomePageView, StoryDetailView, AboutPageView
 
 # API endpoints
 urlpatterns = [
@@ -18,5 +18,9 @@ urlpatterns = [
     url(r'^api/v1/messenger$',
         BotWebHookHandler.as_view(),
         name='messenger'),
+    
+    url(r'^api/v1/cleanup$',
+         CleanupView.as_view(),
+         name='cleanup'),
      
 ]

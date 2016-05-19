@@ -43,10 +43,19 @@ class Contributor(models.Model):
     state = models.CharField(max_length=2, choices=CONTRIBUTOR_STATES, default=BROWSING)
 
     last_active = models.DateTimeField(auto_now_add=True)
+    stale = models.BooleanField(default=False)
     
 
     time_created = models.DateTimeField(auto_now_add=True)
     time_modified = models.DateTimeField(auto_now=True)
+    
+    def mark_stale(self):
+        self.stale = True
+        self.save()
+    
+    def mark_active(self):
+        self.stale = False
+        self.save()
     
     def update_state(self, state):
         self.state = state
@@ -56,7 +65,7 @@ class Contributor(models.Model):
         self.temp_alias = ""
         self.save()
 
-    def get_last_fragment(self, complete=False):
+    def get_last_fragment(self):
         return Fragment.objects.filter(contributor=self).latest('time_modified')
     
     def is_busy(self):
@@ -135,6 +144,7 @@ class Story(models.Model):
             next_availible_story_fragment.save()
 
             contributor.update_state(WRITING)
+            contributor.mark_active()
 
             return next_availible_story_fragment  
         else:

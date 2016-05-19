@@ -46,16 +46,16 @@ def markFragmentAsDone(fragment):
 def updateStory(contributor, content):
     """Update the fragment
     """
-    fragment = contributor.get_last_fragment(complete=False)
-    if fragment:
+    fragment = contributor.get_last_fragment()
+    if fragment and not fragment.complete:
         fragment.edit(content)
     return fragment
 
 def undoLastEdit(contributor):
     """Undo the last edit made by the person
     """
-    fragment = contributor.get_last_fragment(complete=False)
-    if fragment:
+    fragment = contributor.get_last_fragment()
+    if fragment and not fragment.complete:
         fragment.undo_edit()
     return fragment 
 
@@ -64,7 +64,8 @@ def checkForStaleContributors( ):
     """checks stories for any contributors which have not been active
     for a period of time and prompts them to act
     """
-    TIME_DELTA = timedelta(hours=2)
+    # TIME_DELTA = timedelta(hours=2)
+    TIME_DELTA = timedelta(minutes=1)
     now = timezone.now()
     
     unfinished_stories = Story.objects.all().filter(complete=False).order_by('time_created')
@@ -77,6 +78,6 @@ def checkForStaleContributors( ):
             # check if the user has been active
             contributor_last_active = last_incomplete_fragment.contributor.last_active  
             if ( now - contributor_last_active ) > TIME_DELTA:
-                contributors_to_message.append( contributor_last_active )
+                contributors_to_message.append( last_incomplete_fragment.contributor )
                 
     return contributors_to_message

@@ -195,4 +195,23 @@ def notifyOnStoryUpdate( story ):
                 sendBotMessage(contributor.social_identifier, ":|] Story Updated by " + last_complete_fragment.alias)
                 readBackFragment(contributor, last_complete_fragment)
         
-        
+def remindInactiveContributor( contributor ):
+    """notifies a contributor who has been inactive for a while
+    and gives them an opportunity to leave or finish their story
+    """
+    last_fragment = contributor.get_last_fragment()
+    last_story = last_fragment.story
+    sendBotStructuredButtonMessage(contributor.social_identifier,
+                                       ":|] Hey, it's still your turn! Don't keep the others waiting.'",
+                                       [{
+                                            "type": "web_url",
+                                            "title": "Read the story",
+                                            "url": settings.BASE_URL + "/stories/" + str(last_story.id)
+                                        },  
+                                        BUTTON_DONE,
+                                        BUTTON_LEAVE])
+
+def notifyDroppedContributor( contributor ):
+    """notifies a contributor that they are dropped from the story
+    """
+    pass        

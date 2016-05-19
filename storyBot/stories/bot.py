@@ -22,7 +22,7 @@ def handle_join( contributor ):
     # a story
     
     if contributor.is_busy():
-        fragment = contributor.get_last_fragment(complete=False)
+        fragment = contributor.get_last_fragment()
         if fragment:
             # remind the user what they are working on
             dispatchers.sendBotMessage(contributor.social_identifier, ":|] Looks like you are in the middle of a story! Finish or leave it before starting another one.")
@@ -81,7 +81,7 @@ def handle_done( contributor ):
     """handles the case when a user says they are done with their fragment
     """
     # get the last fragment the user was working on
-    fragment = contributor.get_last_fragment(complete=False)
+    fragment = contributor.get_last_fragment()
     
     if story_utilities.markFragmentAsDone( fragment ):
         # fragment is done
