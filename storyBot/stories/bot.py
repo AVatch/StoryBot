@@ -10,7 +10,6 @@ from .helpers import *
 from .content_generators import generate_alias
 from .models import Contributor, Story, Fragment
 from .models import BROWSING, WRITING, NAMING, SPEAKING
-from .models import NUM_STORY_CONTRIBUTORS, NUM_TURNS_PER_CONTRIBUTOR
   
 import story_utilities
 import dispatchers
@@ -71,7 +70,7 @@ def handle_join( contributor ):
             s, f = story_utilities.createStory(contributor)
             # the story and fragment are created, so tell the user to start the story
             dispatchers.sendBotMessage(contributor.social_identifier, ":|] You're starting a new story!")
-            dispatchers.sendBotMessage(contributor.social_identifier, ":|] You're alias for this story will be' " + f.alias + " and will have " + str(NUM_TURNS_PER_CONTRIBUTOR) + " turns.")
+            dispatchers.sendBotMessage(contributor.social_identifier, ":|] You're alias for this story will be' " + f.alias + " and will have BLANK turns.")
 
             dispatchers.sendBotMessage(contributor.social_identifier, ":|] Here is some inspiration if you need it!")
             dispatchers.sendBotMessage(contributor.social_identifier, "o.O " + s.prompt)

@@ -1,13 +1,12 @@
 from __future__ import unicode_literals
+from random import choice
 
 from django.db import models
 
 from content_generators import generate_alias
 
 DEFAULT_STORY_TITLE = "An amazing story in search of a title"
-
 NUM_STORY_CONTRIBUTORS = 2
-NUM_TURNS_PER_CONTRIBUTOR = 4
 
 BROWSING = 'BR'
 WRITING = 'WR'
@@ -20,6 +19,15 @@ CONTRIBUTOR_STATES = (
     (NAMING, 'Naming'),
     (SPEAKING, 'Speaking'),
 )
+
+def calculate_num_of_turns( ):
+    """calculates an number of turns for the story
+    """
+    LOWER_BOUND = 2
+    UPPER_BOUND = 4
+    return choice(range(LOWER_BOUND, UPPER_BOUND, 2))
+
+
 class Contributor(models.Model):
     social_identifier = models.CharField(max_length=200)
     
@@ -64,7 +72,7 @@ class Story(models.Model):
     contributors = models.ManyToManyField(Contributor)
     
     num_of_contributors = models.IntegerField(default=NUM_STORY_CONTRIBUTORS)
-    num_of_turns = models.IntegerField(default=NUM_STORY_CONTRIBUTORS*NUM_TURNS_PER_CONTRIBUTOR)
+    num_of_turns = models.IntegerField(default=calculate_num_of_turns())
     
     time_created = models.DateTimeField(auto_now_add=True)
     time_modified = models.DateTimeField(auto_now=True)
@@ -134,6 +142,11 @@ class Story(models.Model):
         else:
             return None
     
+    def calculate_remaining_number_of_turns(self, contributor):
+        """given a contributor returns how many turns that person has left in this story
+        """
+        pass
+   
     def __str__(self):
         return '%s: %s' % ( self.title, str(self.pk), )
     
