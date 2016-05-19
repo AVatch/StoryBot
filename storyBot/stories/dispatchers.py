@@ -4,6 +4,7 @@ import requests
 
 from django.conf import settings
 
+from .fb_chat_buttons import *
 from .keywords import *
 from .helpers import *
 from .models import Contributor, Story, Fragment

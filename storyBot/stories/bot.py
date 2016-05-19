@@ -249,7 +249,7 @@ def process_postback_message( contributor, payload ):
     since we defined the values
     """
     
-    if story_utilities.hasNumber(payload):
+    if hasNumber(payload):
         story_id = int(payload.split(' ')[1])
         BOT_HANDLER_MAPPING[ KEYWORD_READ ]( contributor, story_id )
     else:
