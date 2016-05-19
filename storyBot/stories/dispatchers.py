@@ -5,7 +5,7 @@ import requests
 from django.conf import settings
 
 from .keywords import *
-from .helpers import *
+from .story_utilities import *
 from .models import Contributor, Story, Fragment
 
 
@@ -166,4 +166,32 @@ def readBackStory( contributor, story ):
                                         "title": "Read the story",
                                         "url": settings.BASE_URL + "/stories/" + str(story.id)
                                     }])
-    
+
+def notifyOnStoryCompletion( story ):
+    contributors = story.contributors.all()
+    for contributor in contributors:
+        contributor.reset_temp_alias()
+        sendBotStructuredButtonMessage(contributor.social_identifier,
+                                       ":|] Looks like one of your stories is complete!",
+                                       [{
+                                            "type": "web_url",
+                                            "title": "Read the story",
+                                            "url": settings.BASE_URL + "/stories/" + str(story.id)
+                                        }, 
+                                        BUTTON_JOIN, 
+                                        BUTTON_BROWSE])   
+
+def notifyOnStoryUpdate( story ):
+    """notify everyone that the story was just updated
+    """
+    contributors = story.contributors.all()
+    last_complete_fragment = story.get_last_complete_fragment()
+    if last_complete_fragment:
+        for contributor in contributors:
+            if contributor == last_complete_fragment.contributor:
+                sendBotMessage(contributor.social_identifier, ":|] We will notify you when it is your turn again!" )
+            else:
+                sendBotMessage(contributor.social_identifier, ":|] Story Updated by " + last_complete_fragment.alias)
+                readBackFragment(contributor, last_complete_fragment)
+        
+        

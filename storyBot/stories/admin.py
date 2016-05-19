@@ -11,7 +11,7 @@ admin.site.register(Contributor, ContributorAdmin)
 
 class FragmentInline(admin.TabularInline):
     model = Fragment
-    extra = 1
+    extra = 0
 
 class StoryAdmin(admin.ModelAdmin):
     model = Story

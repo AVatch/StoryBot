@@ -2,6 +2,8 @@ from __future__ import unicode_literals
 
 from django.db import models
 
+from alias_generator import generate_alias
+
 DEFAULT_STORY_TITLE = "An amazing story in search of a title"
 
 NUM_STORY_CONTRIBUTORS = 2
@@ -37,11 +39,19 @@ class Contributor(models.Model):
     time_created = models.DateTimeField(auto_now_add=True)
     time_modified = models.DateTimeField(auto_now=True)
     
-    def __str__(self):
-        return '%s: %s' % ( self.first_name, self.last_name )
+    def update_state(self, state):
+        self.state = state
+        self.save()
     
+    def reset_temp_alias(self):
+        self.temp_alias = ""
+        self.save()
+
     def get_last_fragment(self, complete=False):
         return Fragment.objects.filter(contributor=self).filter(complete=complete).order_by('time_modified').first()
+    
+    def __str__(self):
+        return '%s: %s' % ( self.first_name, self.last_name )
 
 class Story(models.Model):
     complete = models.BooleanField(default=False)
@@ -58,6 +68,71 @@ class Story(models.Model):
     
     time_created = models.DateTimeField(auto_now_add=True)
     time_modified = models.DateTimeField(auto_now=True)
+    
+    def is_story_done(self):
+        return self.fragment_set.filter(complete=True).count() == self.num_of_turns
+    
+    def mark_complete(self):
+        self.complete = True
+        self.save()
+    
+    def are_all_populated_fragments_done(self):
+        return self.fragment_set.all().filter(contributor__isnull=False).filter(complete=False).count() == 0
+    
+    def add_contributor(self, contributor):
+        if contributor not in self.contributors.all():
+            self.contributors.add(contributor)
+            
+            # check if story is full
+            if self.contributors.all().count() == self.num_of_contributors:
+                self.full = True
+            
+            # commit the change
+            self.save()
+    
+    def remove_contributor(self, contributor):
+        if contributor in self.contributors.all():
+            self.contributors.remove(contributor)
+            
+            # a person left, so the story is not full
+            self.full = False
+            
+            # commit the change
+            self.save()
+    
+    def populate_with_fragments(self):
+        for i in range(self.num_of_turns):
+            fragment = Fragment.objects.create(story=self, position=i) 
+    
+    def associate_fragment_with_contributor(self, contributor):
+        availible_story_fragments = self.fragment_set.filter(contributor__isnull=True).order_by('position')
+        if availible_story_fragments:
+            # update the next story fragment
+            next_availible_story_fragment = availible_story_fragments.first()
+            next_availible_story_fragment.contributor = contributor
+            next_availible_story_fragment.alias = contributor.temp_alias if contributor.temp_alias else generate_alias()
+            next_availible_story_fragment.save()
+
+            contributor.update_state(WRITING)
+
+            return next_availible_story_fragment  
+        else:
+            return None
+    
+    def get_last_complete_fragment(self):
+        return self.fragment_set.filter(complete=True).order_by('position').last()
+    
+    def get_next_contributor(self):
+        last_complete_fragment = self.get_last_complete_fragment()
+        story_contributors = self.contributors.all()
+        if last_complete_fragment:
+            last_contributor = last_complete_fragment.contributor
+            last_contributor_index = list(story_contributors).index(last_contributor)
+            next_contributor = story_contributors[ last_contributor_index + 1 ] if last_contributor_index + 1 < len(story_contributors) else story_contributors.first()
+            
+            return next_contributor
+        else:
+            return None
     
     def __str__(self):
         return '%s: %s' % ( self.title, str(self.pk), )
@@ -88,7 +163,23 @@ class Fragment(models.Model):
 
     time_created = models.DateTimeField(auto_now_add=True)
     time_modified = models.DateTimeField(auto_now=True)
+
+    def mark_complete(self):
+        self.complete = True
+        self.save()
+        # update the contributor
+        self.contributor.update_state(BROWSING)
+
+    def edit(self, content):
+        self.fragment = " ".join([self.fragment, content])
+        self.last_edit = content
+        self.save()
     
+    def undo_edit(self):
+        self.fragment = self.fragment[:-len(self.last_edit)]
+        self.save()
+
     def __str__(self):
         return '%s: %s' % ( str(self.id), self.fragment )
 
+        
