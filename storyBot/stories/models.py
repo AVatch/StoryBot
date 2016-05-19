@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 
-from alias_generator import generate_alias
+from content_generators import generate_alias
 
 DEFAULT_STORY_TITLE = "An amazing story in search of a title"
 

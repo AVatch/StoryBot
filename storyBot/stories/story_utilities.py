@@ -1,20 +1,7 @@
 import datetime 
 from .fb_chat_buttons import *
-from .alias_generator import *
+from .content_generators import *
 from .models import Contributor, Story, Fragment
-
-def hasNumber(string):
-    """check if a string contains a number
-    """
-    return any( char.isdigit() for char in string )
-
-def chunkString(string, length):
-    """Given a string break it down into 
-    chunks of size length
-    """
-    return [string[i:i+length] for i in range(0, len(string), length)]
-
-
 
 def createStory( contributor ):
     """create a story with an initial contributor and 

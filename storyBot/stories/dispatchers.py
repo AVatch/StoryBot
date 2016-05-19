@@ -5,7 +5,7 @@ import requests
 from django.conf import settings
 
 from .keywords import *
-from .story_utilities import *
+from .helpers import *
 from .models import Contributor, Story, Fragment
 
 
@@ -139,7 +139,7 @@ def sendHelpMessage( contributor ):
     
 
 def readBackFragment( contributor, fragment ):
-    """
+    """read back a fragment and properly chunks it up where necessary
     """
     if fragment:
         text = ""

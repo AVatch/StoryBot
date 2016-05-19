@@ -6,7 +6,8 @@ from django.conf import settings
 
 from .keywords import *
 from .fb_chat_buttons import *
-from .alias_generator import generate_alias
+from .helpers import *
+from .content_generators import generate_alias
 from .models import Contributor, Story, Fragment
 from .models import BROWSING, WRITING, NAMING, SPEAKING
 from .models import NUM_STORY_CONTRIBUTORS, NUM_TURNS_PER_CONTRIBUTOR
