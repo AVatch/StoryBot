@@ -27,7 +27,7 @@ BUTTON_DISCARD   =  {
                     }
 BUTTON_DONE      =  {
                         "type": "postback",
-                        "title": "Done",
+                        "title": "Finish turn",
                         "payload": KEYWORD_DONE
                     }
 BUTTON_READ      =  {

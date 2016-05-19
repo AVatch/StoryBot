@@ -274,7 +274,7 @@ def process_raw_message( contributor, payload ):
             fragment = story_utilities.updateStory( contributor, payload )
             story = fragment.story
             dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                       ":|] Story updated! (You can keep writing by sending more messages)",
+                                                       ":|] Got it! You can tell me more or finish your turn.",
                                                        [BUTTON_DONE, BUTTON_UNDO])
         else:
             # we didn't understand the input so show user all
