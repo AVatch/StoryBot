@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+import math
 from random import choice
 
 from django.db import models
@@ -191,7 +192,9 @@ class Story(models.Model):
     def calculate_remaining_number_of_turns(self, contributor):
         """given a contributor returns how many turns that person has left in this story
         """
-        pass
+        num_empty_fragments = self.fragment_set.filter(contributor__isnull=True).count() + 1 # add one for the current user
+        
+        return int( math.ceil( 1.0 * num_empty_fragments / self.num_of_contributors ) )
    
     def __str__(self):
         return '%s: %s' % ( self.title, str(self.pk), )
