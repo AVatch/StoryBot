@@ -64,8 +64,7 @@ def checkForStaleContributors( ):
     """checks stories for any contributors which have not been active
     for a period of time and prompts them to act
     """
-    # TIME_DELTA = timedelta(hours=2)
-    TIME_DELTA = timedelta(minutes=1)
+    TIME_DELTA = timedelta(hours=1)
     now = timezone.now()
     
     contributors_to_message = []
