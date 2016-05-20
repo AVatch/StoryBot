@@ -216,6 +216,11 @@ def handle_help( contributor, detail_level=3 ):
                                             [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
 
 
+def handle_create( contributor):
+    """
+    """
+    pass
+
 
 """Define the bot action handlers to their mapped keywords
 """
@@ -227,7 +232,7 @@ BOT_HANDLER_MAPPING = {
     KEYWORD_BROWSE: handle_browse,
     KEYWORD_HISTORY: handle_history,
     KEYWORD_HELP: handle_help,
-    'create': None # for now
+    'create': handle_create # for now
 }
 
 def process_postback_message( contributor, payload ):
