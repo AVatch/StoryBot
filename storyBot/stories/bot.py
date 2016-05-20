@@ -57,7 +57,7 @@ def handle_join( contributor ):
         available_story = Story.objects.filter(complete=False) \
                                        .filter(full=False) \
                                        .exclude(contributors__in=[contributor]) \
-                                       .order_by('time_created') \
+                                       .order_by('?') \
                                        .first()
         
         if available_story:
