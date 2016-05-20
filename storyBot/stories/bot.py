@@ -185,7 +185,7 @@ def handle_browse( contributor ):
     """Handle the case that the user is attempting to read a random story 
     """    
     # get a random story
-    story = Story.objects.order_by('?').first()
+    story = Story.objects.filter(complete=True).order_by('?').first()
     if story:
         dispatchers.sendBotMessage(contributor.social_identifier,  ":|] Here is a random story")
         dispatchers.readBackStory( contributor, story )
