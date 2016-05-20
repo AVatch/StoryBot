@@ -12,6 +12,7 @@ from .models import Contributor, Story, Fragment
 
 FB_TOKEN = os.environ.get("FB_TOKEN")
 FB_URL = os.environ.get("FB_URL")
+FB_PAGE_ID = os.environ.get("FB_PAGE_ID")
 
 def sendBotMessage(recipient, message, first_person=False):
     """A script to send a facebook message to recipient
@@ -189,6 +190,10 @@ def notifyOnStoryCompletion( story ):
                                         }, 
                                         BUTTON_JOIN, 
                                         BUTTON_BROWSE])   
+    
+    # post to facebook as well
+    postStoryToFacebook( story )
+    
 
 def notifyOnStoryUpdate( story ):
     """notify everyone that the story was just updated
@@ -227,3 +232,16 @@ def notifyKickedContributor( contributor ):
                                        [BUTTON_JOIN,
                                         BUTTON_READ,
                                         BUTTON_HISTORY])        
+
+
+def postStoryToFacebook( story ):
+    """Posts story snippet to the facebook page
+    ref: https://developers.facebook.com/docs/graph-api/reference/v2.6/page/feed#publish
+    """
+    r = requests.post("https://graph.facebook.com/v2.6/" + FB_PAGE_ID + "/feed", 
+                  params = { 'access_token': FB_TOKEN },
+                  headers = {'content-type': 'application/json'},
+                  data = json.dumps({
+                      "message": "Hello world"
+                  }) )
+    print r.json()

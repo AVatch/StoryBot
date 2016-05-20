@@ -43,7 +43,9 @@
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                     
                     {% for fragment in fragments %}
-                        <p style="opacity: 0.9; color: {{ contributors|get_item:fragment.contributor.id|get_item:'color' }};" > {{ fragment.fragment }} </p>
+                        {% if fragment.contributor %}
+                            <p style="opacity: 0.9; color: {{ contributors|get_item:fragment.contributor.id|get_item:'color' }};" > {{ fragment.fragment }} </p>
+                        {% endif %}
                     {% endfor %}
                     
                 </div>
