@@ -169,7 +169,15 @@ def readBackStory( contributor, story ):
                                     }])
 
 def notifyOnStoryCompletion( story ):
-    contributors = story.contributors.all()
+    # we want to get the contributors from the fragments 
+    # rather than the story since ppl may have left, and we want 
+    # to notify them as well
+    contributors = []
+    fragments = story.fragment_set.all().order_by('position')
+    for fragment in fragments:
+        if fragment.contributor not in contributors:
+            contributors.append(fragment.contributor)
+    
     for contributor in contributors:
         contributor.reset_temp_alias()
         sendBotStructuredButtonMessage(contributor.social_identifier,

@@ -38,13 +38,11 @@ class Contributor(models.Model):
     gender = models.CharField(max_length=100, blank=True, null=True)
     timezone = models.IntegerField(blank=True, null=True)
     
-    temp_alias = models.CharField(max_length=100, blank=True, null=True)
-    
     state = models.CharField(max_length=2, choices=CONTRIBUTOR_STATES, default=BROWSING)
-
-    last_active = models.DateTimeField(auto_now_add=True)
+    temp_alias = models.CharField(max_length=100, blank=True, null=True)
+    last_active = models.DateTimeField(null=True, blank=True)
     stale = models.BooleanField(default=False)
-    
+    active_story = models.IntegerField(blank=True, null=True)
 
     time_created = models.DateTimeField(auto_now_add=True)
     time_modified = models.DateTimeField(auto_now=True)
@@ -66,7 +64,17 @@ class Contributor(models.Model):
         self.save()
 
     def get_last_fragment(self):
-        return Fragment.objects.filter(contributor=self).latest('time_modified')
+        return Fragment.objects.filter(contributor=self).order_by('time_modified').last()
+    
+    def set_active_story(self, id):
+        self.active_story = id
+        self.save()
+    
+    def get_active_story(self):
+        if self.last_story:
+            return Story.objects.get(id = self.active_story)
+        else:
+            return None
     
     def is_busy(self):
         """determine if the contributor is currently writing or part of a story
@@ -119,6 +127,9 @@ class Story(models.Model):
             
             # commit the change
             self.save()
+            
+            # update the contributor
+            contributor.set_active_story(self.id)
     
     def remove_contributor(self, contributor):
         if contributor in self.contributors.all():
@@ -134,10 +145,11 @@ class Story(models.Model):
             contributor.mark_active()
             contributor.update_state(BROWSING)
             contributor.reset_temp_alias()
+            contributor.set_active_story(0)
             
             # remove the fragment as it is no longer valid
             fragment = contributor.get_last_fragment()
-            fragment.delete()
+            fragment.empty_fragment()
     
     def populate_with_fragments(self):
         for i in range(self.num_of_turns):
@@ -226,6 +238,13 @@ class Fragment(models.Model):
     def undo_edit(self):
         self.fragment = self.fragment[:-len(self.last_edit)]
         self.last_edit = ""
+        self.save()
+
+    def empty_fragment(self):
+        self.fragment = ""
+        self.complete = False
+        self.contributor = None
+        self.alias = ""
         self.save()
 
     def __str__(self):
