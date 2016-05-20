@@ -16,7 +16,7 @@
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                     <div class="post-heading">
-                        <h1>{{ story.prompt }}</h1>
+                        <h1>"{{ story.prompt }}"</h1>
                         <h2 class="subheading">{% if story.complete %} Completed {% else %} Incomplete {% endif %} | <a href="{{ story.prompt_link }}" target="_blank">Prompt Source</a></h2>
                         <span class="meta">Created by 
                             {% for contributor_id, contributor in contributors.items %}
