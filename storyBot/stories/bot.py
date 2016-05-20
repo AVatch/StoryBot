@@ -1,6 +1,10 @@
 import random
 import math
 
+import os
+import json
+import requests
+
 from django.db.models import Count
 from django.conf import settings
 
@@ -13,6 +17,20 @@ from .models import BROWSING, WRITING, NAMING, SPEAKING
   
 import story_utilities
 import dispatchers
+
+
+FB_TOKEN = os.environ.get("FB_TOKEN")
+
+def get_user_fb_info(fb_id):
+    """returns the users fb info
+    ref: https://developers.facebook.com/docs/messenger-platform/send-api-reference#user_profile_request
+    """
+    r = requests.get('https://graph.facebook.com/v2.6/' + str(fb_id),
+                     params={
+                         'fields': 'first_name,last_name,profile_pic,locale,timezone,gender',
+                         'access_token': FB_TOKEN
+                     })
+    return r.json()
 
 
 def handle_join( contributor ):
@@ -219,7 +237,19 @@ def handle_help( contributor, detail_level=3 ):
 def handle_create( contributor):
     """
     """
-    pass
+    fb_info = get_user_fb_info( contributor.social_identifier )            
+    contributor.profile_pic = fb_info.get('profile_pic')
+    contributor.first_name = fb_info.get('first_name')
+    contributor.last_name = fb_info.get('last_name')
+    contributor.locale = fb_info.get('locale')
+    contributor.gender = fb_info.get('gender')
+    contributor.timezone = fb_info.get('timezone')
+    contributor.save()
+    
+    dispatchers.sendBotMessage(contributor.social_identifier, "Thanks for joining StoryBot!")
+    dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                    "Let's get started.",
+                                    [BUTTON_JOIN, BUTTON_BROWSE])
 
 
 """Define the bot action handlers to their mapped keywords
