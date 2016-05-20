@@ -61,7 +61,7 @@ def handle_join( contributor ):
             if story.are_all_populated_fragments_done():
                 # Associate the next story fragment with the contributor
                 story.associate_fragment_with_contributor(contributor)
-                dispatchers.sendBotMessage(contributor.social_identifier, ":|] It's your turn, send us a message to add it to the story!")
+                dispatchers.sendBotMessage(contributor.social_identifier, ":|] It's your turn, you have " + str(story.calculate_remaining_number_of_turns(contributor )) + " turns left, send us a message to add it to the story!")
             else:            
                 dispatchers.sendBotMessage(contributor.social_identifier, ":|] We'll let you know when it's your turn!")
             
