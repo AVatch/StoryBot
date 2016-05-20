@@ -48,8 +48,6 @@ def get_user_fb_info(fb_id):
 
 @register.filter
 def get_item(dictionary, key):
-    print dictionary
-    print key
     if dictionary:
         return dictionary.get(key)
 

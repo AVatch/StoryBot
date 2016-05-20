@@ -85,7 +85,7 @@ WSGI_APPLICATION = 'storyBot.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-if os.environ.get("DEBUG_ENV"):
+if os.environ.get("DEBUG_ENV") == 'True':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
