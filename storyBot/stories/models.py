@@ -24,8 +24,8 @@ CONTRIBUTOR_STATES = (
 def calculate_num_of_turns( ):
     """calculates an number of turns for the story
     """
-    LOWER_BOUND = 2
-    UPPER_BOUND = 4
+    LOWER_BOUND = 4
+    UPPER_BOUND = 8
     return choice(range(LOWER_BOUND, UPPER_BOUND, 2)) # ensure its even
 
 
