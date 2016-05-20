@@ -226,7 +226,8 @@ BOT_HANDLER_MAPPING = {
     KEYWORD_LEAVE: handle_leave,
     KEYWORD_BROWSE: handle_browse,
     KEYWORD_HISTORY: handle_history,
-    KEYWORD_HELP: handle_help
+    KEYWORD_HELP: handle_help,
+    'create': None # for now
 }
 
 def process_postback_message( contributor, payload ):
