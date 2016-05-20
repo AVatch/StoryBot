@@ -1,5 +1,13 @@
 {% extends 'base.html' %}
 
+{% block facebookTags %}
+<meta property="og:url"           content="{{ story_url_path }}" />
+<meta property="og:type"          content="website" />
+<meta property="og:title"         content="{{ story.prompt }}" />
+<meta property="og:description"   content="{{ description }}" />
+<meta property="og:image"         content="{{ cover }}" />
+{% endblock %}
+
 {% block content %}
     <!-- Page Header -->
     <!-- Set your background image for this header on the line below. -->
@@ -28,8 +36,6 @@
                                 Tweet</a>
                             </div>
                          </div>
-                         
-
                     </div>
                 </div>
             </div>

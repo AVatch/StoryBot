@@ -14,14 +14,7 @@
     <title>StoryBot</title>
     
     
-    {% if story %}
-    <meta property="og:url"           content="{{ story_url_path }}" />
-	<meta property="og:type"          content="website" />
-	<meta property="og:title"         content="{{ story.prompt }}" />
-	<meta property="og:description"   content="{{ description }}" />
-	<meta property="og:image"         content="{{ cover }}" />
-    
-    {% endif %}
+    {% block facebookTags %}{% endblock %}
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
