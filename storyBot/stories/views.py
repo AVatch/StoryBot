@@ -24,7 +24,7 @@ import dispatchers
 from .keywords import *
 from .fb_chat_buttons import *
 from .models import Contributor, Fragment, Story
-from .alias_generator import generate_alias, generate_title, generate_random_gif
+from .content_generators import generate_alias, generate_title, generate_random_gif
 from .story_utilities import checkForStaleContributors, kickStaleContributor
 
 FB_WEBHOOK_CHALLENGE = os.environ.get("FB_WEBHOOK_CHALLENGE")
