@@ -3,6 +3,7 @@ import math
 from random import choice
 
 from django.db import models
+from django.utils import timezone
 
 from content_generators import generate_alias
 
@@ -47,6 +48,10 @@ class Contributor(models.Model):
 
     time_created = models.DateTimeField(auto_now_add=True)
     time_modified = models.DateTimeField(auto_now=True)
+    
+    def mark_last_active_time(self):
+        self.last_active = timezone.now()
+        self.save()
     
     def mark_stale(self):
         self.stale = True

@@ -75,7 +75,6 @@ class BotWebHookHandler(APIView):
         for event in messenger_events:
             
             contributor, created = Contributor.objects.get_or_create(social_identifier=str( event.get('sender').get('id') ) )
-            contributor.last_active = timezone.now()
             contributor.save()
                         
             if created:
@@ -98,11 +97,13 @@ class BotWebHookHandler(APIView):
             if event.get('postback') and event.get('postback').get('payload'):
                 """Handle PB postback style messages
                 """
+                contributor.mark_last_active_time()
                 bot.process_postback_message( contributor, event.get('postback').get('payload') )
             
             elif event.get('message') and event.get('message').get('text'):
                 """Handle messages with text
                 """
+                contributor.mark_last_active_time()
                 bot.process_raw_message( contributor, event.get('message').get('text') )
             
             elif event.get('delivery'):

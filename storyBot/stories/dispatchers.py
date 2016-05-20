@@ -192,7 +192,8 @@ def notifyOnStoryCompletion( story ):
                                         BUTTON_BROWSE])   
     
     # post to facebook as well
-    postStoryToFacebook( story )
+    # TBD - update the fb token
+    # postStoryToFacebook( story ) 
     
 
 def notifyOnStoryUpdate( story ):
