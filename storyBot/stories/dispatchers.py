@@ -181,6 +181,7 @@ def notifyOnStoryCompletion( story ):
     
     for contributor in contributors:
         contributor.reset_temp_alias()
+        contributor.set_active_story(0)
         sendBotStructuredButtonMessage(contributor.social_identifier,
                                        ":|] Looks like one of your stories is complete!",
                                        [{
