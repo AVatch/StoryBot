@@ -232,7 +232,7 @@ BOT_HANDLER_MAPPING = {
     KEYWORD_BROWSE: handle_browse,
     KEYWORD_HISTORY: handle_history,
     KEYWORD_HELP: handle_help,
-    'create': handle_create # for now
+    KEYWORD_CREATE: handle_create
 }
 
 def process_postback_message( contributor, payload ):
@@ -247,6 +247,8 @@ def process_postback_message( contributor, payload ):
         story_id = int(payload.split(' ')[1])
         BOT_HANDLER_MAPPING[ KEYWORD_READ ]( contributor, story_id )
     else:
+        print '*'*50
+        print payload
         BOT_HANDLER_MAPPING[ payload ]( contributor )
 
 def process_raw_message( contributor, payload ):
