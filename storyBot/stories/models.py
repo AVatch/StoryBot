@@ -133,11 +133,10 @@ class Story(models.Model):
     
     def remove_contributor(self, contributor):
         if contributor in self.contributors.all():
+            # remove from the active contributors
             self.contributors.remove(contributor)
-            
             # a person left, so the story is not full
             self.full = False
-            
             # commit the change
             self.save()
             

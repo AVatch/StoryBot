@@ -70,7 +70,7 @@ class BotWebHookHandler(APIView):
         
     
         messenger_events = request.data.get('entry')[0].get('messaging')
-    
+
         for event in messenger_events:
             
             contributor, created = Contributor.objects.get_or_create(social_identifier=str( event.get('sender').get('id') ) )
@@ -99,11 +99,20 @@ class BotWebHookHandler(APIView):
                 """
                 bot.process_postback_message( contributor, event.get('postback').get('payload') )
             
-            if event.get('message') and event.get('message').get('text'):
+            elif event.get('message') and event.get('message').get('text'):
                 """Handle messages with text
                 """
                 bot.process_raw_message( contributor, event.get('message').get('text') )
-           
+            
+            elif event.get('delivery'):
+                """Handle the deliver confirmation of the message
+                """
+                pass # we dont really care about this at the moment
+            else:
+                """Handle any other type of messages
+                """
+                dispatchers.sendBotMessage(contributor.social_identifier, ":P")
+
         """Return a 200 to the messenger provider 
         """
         return Response( status=status.HTTP_200_OK )
@@ -118,19 +127,19 @@ class CleanupView(APIView):
     
     def post(self, request, format=None):
         stale_contributors = checkForStaleContributors()
+        print "-"*50
         print "STALE CONTRIBUTORS"
         print stale_contributors
+        print "-"*50
         for contributor in stale_contributors:
             if contributor.stale:
                 # this is the 2nd time we are asking them to write
                 # so kick them
-                print "KICK"*50
                 kickStaleContributor( contributor )
                 dispatchers.notifyKickedContributor( contributor )
                 
             else:
                 # notify them to act
-                print "NOTIFY"
                 dispatchers.remindInactiveContributor( contributor )
                 # mark them stale for next time
                 contributor.mark_stale()

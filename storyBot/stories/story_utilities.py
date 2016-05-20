@@ -79,8 +79,7 @@ def checkForStaleContributors( ):
 def kickStaleContributor( contributor ):
     """kicks a contributor from the story since they have been inactive
     """
-    last_fragment = contributor.get_last_fragment()
-    last_story = last_fragment.story
-    
+    active_story = contributor.active_story
+
     # remove the contributor from the story 
-    last_story.remove_contributor( contributor )
+    active_story.remove_contributor( contributor )

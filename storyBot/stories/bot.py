@@ -148,20 +148,10 @@ def handle_undo( contributor ):
 def handle_leave( contributor ):
     """Handle the case that the user is attempting to leave the story
     """
-    fragment = contributor.fragment_set.all().order_by('time_modified').last()
-    
-    print fragment
-    
-    if fragment:
-        # erase the contents of the fragment
-        fragment.delete()
-        
-        # remove the person from the story
-        story = fragment.story
-        story.full = False
-        story.contributors.remove(contributor)
-        story.save()
-        
+    active_story = contributor.active_story
+    if active_story:
+        active_story = Story.objects.get(id=active_story)
+        active_story.remove_contributor( contributor ) 
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                    ":|] You just left the story",
                                                    [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
@@ -178,18 +168,22 @@ def handle_browse( contributor ):
     """    
     # get a random story
     story = Story.objects.order_by('?').first()
-    dispatchers.sendBotMessage(contributor.social_identifier,  ":|] Here is a random story")
-    dispatchers.readBackStory( contributor, story )
-    dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                           ":|] What would you like to do now?",
-                                                           [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
-
+    if story:
+        dispatchers.sendBotMessage(contributor.social_identifier,  ":|] Here is a random story")
+        dispatchers.readBackStory( contributor, story )
+        dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                                            ":|] What would you like to do now?",
+                                                            [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
+    else:
+        dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
+                                                            ":|] Well this is embarassing, we can't find any stories",
+                                                            [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
 
 def handle_history( contributor ):
     """Handle the case that the user is attempting to see a history of their writing 
     """
     dispatchers.sendBotMessage(contributor.social_identifier, ":|] Here is a history of your stories")
-    
+
     stories = Story.objects.filter(contributors__in=[contributor])
     
     chunk_size = 3 # fb lets us put only 3 buttons at a time
@@ -222,6 +216,9 @@ def handle_help( contributor, detail_level=3 ):
                                             [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
 
 
+
+"""Define the bot action handlers to their mapped keywords
+"""
 BOT_HANDLER_MAPPING = {
     KEYWORD_JOIN: handle_join,
     KEYWORD_DONE: handle_done,
@@ -231,9 +228,6 @@ BOT_HANDLER_MAPPING = {
     KEYWORD_HISTORY: handle_history,
     KEYWORD_HELP: handle_help
 }
-
-
-
 
 def process_postback_message( contributor, payload ):
     """FB provides postbacks where we can designate
