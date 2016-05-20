@@ -167,7 +167,7 @@ class Story(models.Model):
             contributor.update_state(WRITING)
             contributor.mark_active()
 
-            return next_availible_story_fragment  
+            return next_availible_story_fragment
         else:
             return None
     
@@ -231,12 +231,12 @@ class Fragment(models.Model):
         self.contributor.update_state(BROWSING)
 
     def edit(self, content):
-        self.fragment = " ".join([self.fragment, content])
+        self.fragment = " ".join([self.fragment, content]).strip()
         self.last_edit = content
         self.save()
     
     def undo_edit(self):
-        self.fragment = self.fragment[:-len(self.last_edit)]
+        self.fragment = self.fragment[:-len(self.last_edit)].strip()
         self.last_edit = ""
         self.save()
 
