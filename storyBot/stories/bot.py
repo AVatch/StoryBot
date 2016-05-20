@@ -88,7 +88,7 @@ def handle_join( contributor ):
             s, f = story_utilities.createStory(contributor)
             # the story and fragment are created, so tell the user to start the story
             dispatchers.sendBotMessage(contributor.social_identifier, ":|] You're starting a new story!")
-            dispatchers.sendBotMessage(contributor.social_identifier, ":|] You're alias for this story will be' " + f.alias + " and will have " + str( s.calculate_remaining_number_of_turns( contributor ) ) + " turns.")
+            dispatchers.sendBotMessage(contributor.social_identifier, ":|] Your alias for this story will be' " + f.alias + " and will have " + str( s.calculate_remaining_number_of_turns( contributor ) ) + " turns.")
 
             dispatchers.sendBotMessage(contributor.social_identifier, ":|] Here is some inspiration if you need it!")
             dispatchers.sendBotMessage(contributor.social_identifier, "o.O " + s.prompt)
