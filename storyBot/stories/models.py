@@ -173,8 +173,8 @@ class Story(models.Model):
             next_availible_story_fragment.alias = contributor.temp_alias if contributor.temp_alias else generate_alias()
             next_availible_story_fragment.save()
 
-            contributor.update_state(WRITING)
             contributor.mark_active()
+            contributor.update_state(WRITING)
 
             return next_availible_story_fragment
         else:
@@ -239,6 +239,7 @@ class Fragment(models.Model):
         self.complete = True
         self.save()
         # update the contributor
+        contributor.mark_active()
         self.contributor.update_state(BROWSING)
 
     def edit(self, content):
