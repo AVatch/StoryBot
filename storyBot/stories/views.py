@@ -23,7 +23,7 @@ import bot
 import dispatchers
 from .keywords import *
 from .fb_chat_buttons import *
-from .models import Contributor, Fragment, Story
+from .models import Contributor, Fragment, Story, WRITING
 from .content_generators import generate_alias, generate_title, generate_random_gif
 from .story_utilities import checkForStaleContributors, kickStaleContributor
 
@@ -114,17 +114,18 @@ class CleanupView(APIView):
     
     def post(self, request, format=None):
         stale_contributors = checkForStaleContributors()
-        print "-"*50
-        print "STALE CONTRIBUTORS"
-        print stale_contributors
-        print "-"*50
+
         for contributor in stale_contributors:
-            if contributor.stale:
+            if contributor.stale and contributor.state == WRITING:
                 # this is the 2nd time we are asking them to write
                 # so kick them
                 kickStaleContributor( contributor )
                 dispatchers.notifyKickedContributor( contributor )
-                
+            
+            elif contributor.stale and contributor.state != WRITING:
+                # they acted since they are not in WRITING state
+                contributor.mark_active()
+
             else:
                 # notify them to act
                 dispatchers.remindInactiveContributor( contributor )
