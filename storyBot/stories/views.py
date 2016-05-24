@@ -211,6 +211,7 @@ class StoryDetailView(View):
         
         for contributor in story.contributors.all():
             color = random.choice(COLORS)
+            COLORS.remove(color) # to make sure we dont pick the same color twice
             
             context["contributors"][contributor.id] = {
                 "color": color,
