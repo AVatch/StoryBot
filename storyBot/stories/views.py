@@ -188,7 +188,7 @@ class StoryDetailView(View):
         
         # Colors from colourlovers
         # http://www.colourlovers.com/palette/1930/cheer_up_emo_kid
-        COLORS = ['#556270', '#4ECDC4', '#C7F464', '#FF6B6B', '#C44D58']
+        COLORS = ['#556270', '#4ECDC4', '#C7F464', '#FF6B6B', '#BD1550']
         
         story = get_object_or_404(Story, pk=pk)
         
