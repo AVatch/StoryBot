@@ -105,7 +105,7 @@ class Story(models.Model):
     prompt = models.CharField(max_length=250, blank=True)
     prompt_link = models.URLField(blank=True)
     
-    contributors = models.ManyToManyField(Contributor)
+    contributors = models.ManyToManyField(Contributor, blank=True, null=True)
     
     num_of_contributors = models.IntegerField(default=NUM_STORY_CONTRIBUTORS)
     num_of_turns = models.IntegerField(default=calculate_num_of_turns())
