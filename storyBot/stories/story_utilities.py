@@ -77,7 +77,12 @@ def kickStaleContributor( contributor ):
     """kicks a contributor from the story since they have been inactive
     """
     if contributor.active_story:
-        active_story = Story.objects.get(id=contributor.active_story)
+    
+        try:
+            active_story = Story.objects.get(id=contributor.active_story)
+        except Story.DoesNotExist:
+            active_story = None
+
         if active_story:
             # remove the contributor from the story 
             active_story.remove_contributor( contributor )
