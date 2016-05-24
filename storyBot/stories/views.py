@@ -188,7 +188,9 @@ class StoryDetailView(View):
         
         # Colors from colourlovers
         # http://www.colourlovers.com/palette/1930/cheer_up_emo_kid
-        COLORS = ['#556270', '#4ECDC4', '#C7F464', '#FF6B6B', '#BD1550']
+        COLORS = ['#556270', '#4ECDC4', '#C7F464', '#FF6B6B', 
+                  '#BD1550', '#009989', '#EDB92E', '#00AAFF', 
+                  '#AA00FF', '#FF00AA', '#FFAA00', '#AAFF00']
         
         story = get_object_or_404(Story, pk=pk)
         
@@ -209,6 +211,7 @@ class StoryDetailView(View):
         
         for contributor in story.contributors.all():
             color = random.choice(COLORS)
+            
             context["contributors"][contributor.id] = {
                 "color": color,
                 "alias": ""
