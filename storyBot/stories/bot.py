@@ -169,7 +169,7 @@ def handle_leave( contributor ):
     active_story = contributor.active_story
     if active_story:
         active_story = Story.objects.get(id=active_story)
-        active_story.remove_contributor( contributor ) 
+        active_story.remove_contributor( contributor )
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                    ":|] You just left the story",
                                                    [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])

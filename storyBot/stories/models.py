@@ -155,6 +155,10 @@ class Story(models.Model):
             # remove the fragment as it is no longer valid
             fragment = contributor.get_last_fragment()
             fragment.empty_fragment()
+            
+            # if everyone left, scrap the story
+            if self.contributors.count() == 0:
+                self.delete()
     
     def populate_with_fragments(self):
         for i in range(self.num_of_turns):

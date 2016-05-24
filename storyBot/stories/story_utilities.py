@@ -41,8 +41,6 @@ def markFragmentAsDone(fragment):
     else:
         return None
 
-
-
 def updateStory(contributor, content):
     """Update the fragment
     """
