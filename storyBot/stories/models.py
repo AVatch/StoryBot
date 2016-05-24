@@ -157,7 +157,7 @@ class Story(models.Model):
             fragment.empty_fragment()
             
             # if everyone left, scrap the story
-            if self.contributors.count() == 0:
+            if self.contributors.count() == 0 and self.fragment_set.count() == 0:
                 self.delete()
     
     def populate_with_fragments(self):
