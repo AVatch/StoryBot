@@ -186,6 +186,10 @@ designated by its id
 class StoryDetailView(View):
     def get(self, request, pk):
         
+        # Colors from colourlovers
+        # http://www.colourlovers.com/palette/1930/cheer_up_emo_kid
+        COLORS = ['#556270', '#4ECDC4', '#C7F464', '#FF6B6B', '#C44D58']
+        
         story = get_object_or_404(Story, pk=pk)
         
         contributors = {}
@@ -204,7 +208,7 @@ class StoryDetailView(View):
         context["description"] = context["fragments"][0].fragment[:130] + "..."
         
         for contributor in story.contributors.all():
-            color = "#%06x" % random.randint(0, 0xFFFFFF)
+            color = random.choice(COLORS)
             context["contributors"][contributor.id] = {
                 "color": color,
                 "alias": ""
