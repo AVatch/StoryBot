@@ -5,11 +5,6 @@ BUTTON_JOIN      =  {
                         "title": "Join a story",
                         "payload": KEYWORD_JOIN
                     }
-BUTTON_CONTINUE  =  {
-                        "type": "postback",
-                        "title": "Continue last draft",
-                        "payload": KEYWORD_CONTINUE
-                    }
 BUTTON_BROWSE    =  {
                         "type": "postback",
                         "title": "Read a random story",
@@ -19,11 +14,6 @@ BUTTON_UNDO      =  {
                         "type": "postback",
                         "title": "Undo",
                         "payload": KEYWORD_UNDO
-                    }
-BUTTON_DISCARD   =  {
-                        "type": "postback",
-                        "title": "Discard your draft",
-                        "payload": KEYWORD_DISCARD
                     }
 BUTTON_DONE      =  {
                         "type": "postback",
@@ -44,4 +34,14 @@ BUTTON_LEAVE     =  {
                         "type": "postback",
                         "title": "Leave the story",
                         "payload": KEYWORD_LEAVE
+                    }
+BUTTON_SKIP      =  {
+                        "type": "postback",
+                        "title": "Skip",
+                        "payload": KEYWORD_SKIP
+                    }
+BUTTON_OPTIONS   =  {
+                        "type": "postback",
+                        "title": "Options",
+                        "payload": KEYWORD_OPTIONS
                     }

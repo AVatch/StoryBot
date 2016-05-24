@@ -68,6 +68,10 @@ class Contributor(models.Model):
     def reset_temp_alias(self):
         self.temp_alias = ""
         self.save()
+    
+    def assign_temp_alias(self):
+        self.temp_alias = generate_alias()
+        self.save()
 
     def get_last_fragment(self):
         return Fragment.objects.filter(contributor=self).order_by('time_modified').last()
@@ -105,7 +109,7 @@ class Story(models.Model):
     prompt = models.CharField(max_length=250, blank=True)
     prompt_link = models.URLField(blank=True)
     
-    contributors = models.ManyToManyField(Contributor, blank=True, null=True)
+    contributors = models.ManyToManyField(Contributor, blank=True)
     
     num_of_contributors = models.IntegerField(default=NUM_STORY_CONTRIBUTORS)
     num_of_turns = models.IntegerField(default=calculate_num_of_turns())
@@ -126,16 +130,16 @@ class Story(models.Model):
     def add_contributor(self, contributor):
         if contributor not in self.contributors.all():
             self.contributors.add(contributor)
-            
             # check if story is full
             if self.contributors.all().count() == self.num_of_contributors:
                 self.full = True
-            
             # commit the change
             self.save()
             
             # update the contributor
+            contributor.assign_temp_alias( )
             contributor.set_active_story(self.id)
+            contributor.mark_active( )
     
     def remove_contributor(self, contributor):
         if contributor in self.contributors.all():
@@ -152,12 +156,13 @@ class Story(models.Model):
             contributor.reset_temp_alias()
             contributor.set_active_story(0)
             
-            # remove the fragment as it is no longer valid
+            # remove the fragment if it is not complete
             fragment = contributor.get_last_fragment()
-            fragment.empty_fragment()
+            if fragment and not fragment.complete:
+                fragment.empty_fragment()
             
             # if everyone left, scrap the story
-            if self.contributors.count() == 0 and self.fragment_set.count() == 0:
+            if self.contributors.count() == 0 and self.fragment_set.filter(complete=True).count() == 0:
                 self.delete()
     
     def populate_with_fragments(self):
@@ -239,7 +244,7 @@ class Fragment(models.Model):
         self.complete = True
         self.save()
         # update the contributor
-        contributor.mark_active()
+        self.contributor.mark_active()
         self.contributor.update_state(BROWSING)
 
     def edit(self, content):

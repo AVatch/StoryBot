@@ -41,3 +41,14 @@ def generate_random_gif():
                       headers = {'content-type': 'application/json'})
     gif = r.json()["data"]["url"]
     return gif
+
+
+PLACEHOLDER_IMG = "http://placehold.it/350x150"
+def generate_search_img():
+    return PLACEHOLDER_IMG
+
+def generate_read_img():
+    return PLACEHOLDER_IMG
+    
+def generate_done_img():
+    return PLACEHOLDER_IMG

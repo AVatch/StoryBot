@@ -18,7 +18,6 @@ from .models import BROWSING, WRITING, NAMING, SPEAKING
 import story_utilities
 import dispatchers
 
-
 FB_TOKEN = os.environ.get("FB_TOKEN")
 
 def get_user_fb_info(fb_id):
@@ -33,67 +32,63 @@ def get_user_fb_info(fb_id):
     return r.json()
 
 
-def handle_join( contributor ):
+
+
+def handle_options( contributor ):
+    """Handle the case for a general menu of options
+    """
+    dispatchers.ctaOptionsMenu( contributor )
+
+
+def handle_join( contributor, ignore_story_ids=None ):
     """Join a story
     """
-    # First let's check to make sure the user is not currently working on
-    # a story
+    
+    # send some flare
+    dispatchers.flareOnSearch( contributor )
     
     if contributor.is_busy():
-        fragment = contributor.get_last_fragment()
-        if fragment:
-            # remind the user what they are working on
-            dispatchers.sendBotMessage(contributor.social_identifier, ":|] Looks like you are in the middle of a story! Finish or leave it before starting another one.")
-            dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                    ":|] Your alias for this story is " + fragment.alias,
-                                                    [{
-                                                            "type": "web_url",
-                                                            "title": "Read the story",
-                                                            "url": settings.BASE_URL + "/stories/" + str(fragment.story.id)
-                                                        }, BUTTON_LEAVE])
+        """ the contributor is currently busy so they need to
+        finish or leave their current story before starting a new one
+        """
+        try:
+            active_story = Story.objects.get(id=contributor.active_story)
+        except Story.DoesNotExist:
+            active_story = None
+        
+        if active_story:
+            dispatchers.ctaNewStoryOnBusy( contributor, active_story )
         else:
-            print "FAILED TO GET LAST FRAGMENT"
+            dispatchers.sendBotMessage("You broke me, sorry!")
+            dispatchers.ctaOptionsMenu( contributor )
+        
     else:
+        """ the contributor is availible to start/join a new story
+        """
         available_story = Story.objects.filter(complete=False) \
                                        .filter(full=False) \
-                                       .exclude(contributors__in=[contributor]) \
-                                       .order_by('?') \
-                                       .first()
+                                       .exclude(contributors__in=[contributor])
+        
+        print available_story
+        
+        if ignore_story_ids:
+            available_story = available_story.exclude(id__in=ignore_story_ids)
+        
+        print ignore_story_ids
+        print available_story
+        
+        # pick a random story from the set of stories
+        available_story = available_story.order_by('?').first()
+        
+        
+        
         
         if available_story:
             # join the story
-            story = story_utilities.joinStory(contributor, available_story)
-            contributor.temp_alias = generate_alias()
-            contributor.save()
-
-            # tell the user they are paired up
-            dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                        ":|] We've found a story for you to join! For this story you will be called " + contributor.temp_alias,
-                                                        [{
-                                                                "type": "web_url",
-                                                                "title": "Read the story",
-                                                                "url": settings.BASE_URL + "/stories/" + str(story.id)
-                                                            }, BUTTON_LEAVE])
-            
-            # check if the other people are done and it is your turn
-            if story.are_all_populated_fragments_done():
-                # Associate the next story fragment with the contributor
-                story.associate_fragment_with_contributor(contributor)
-                dispatchers.sendBotMessage(contributor.social_identifier, ":|] It's your turn, you have " + str(story.calculate_remaining_number_of_turns(contributor )) + " turns left, send us a message to add it to the story!")
-            else:            
-                dispatchers.sendBotMessage(contributor.social_identifier, ":|] We'll let you know when it's your turn!")
-            
+            story_utilities.joinStory(contributor, available_story)            
         else:
             # create a new one
-            s, f = story_utilities.createStory(contributor)
-            # the story and fragment are created, so tell the user to start the story
-            dispatchers.sendBotMessage(contributor.social_identifier, ":|] You're starting a new story!")
-            dispatchers.sendBotMessage(contributor.social_identifier, ":|] Your alias for this story will be' " + f.alias + " and will have " + str( s.calculate_remaining_number_of_turns( contributor ) ) + " turns.")
-
-            dispatchers.sendBotMessage(contributor.social_identifier, ":|] Here is some inspiration if you need it!")
-            dispatchers.sendBotMessage(contributor.social_identifier, "o.O " + s.prompt)
-            dispatchers.sendBotMessage(contributor.social_identifier, ":|] You can start writing.")
-            
+            story_utilities.createStory(contributor)
 
 def handle_done( contributor ):
     """handles the case when a user says they are done with their fragment
@@ -166,24 +161,36 @@ def handle_undo( contributor ):
 def handle_leave( contributor ):
     """Handle the case that the user is attempting to leave the story
     """
-    active_story = contributor.active_story
-    if active_story:
-        active_story = Story.objects.get(id=active_story)
-        active_story.remove_contributor( contributor )
+    story = story_utilities.leaveStory( contributor )
+    if story:
+        # succesfully left story
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                   ":|] You just left the story",
+                                                   ":|] You've left the story. We'll keep your submitted work for this story and notify you when the story is complete",
                                                    [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
     else:
-        dispatchers.sendBotMessage(contributor.social_identifier,  "You are not working on any story")
-        dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                   ":|] What would you like to do?",
-                                                   [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
+        # there was an issue leaving the story
+        dispatchers.sendBotMessage(contributor.social_identifier,  "It looks like you are not working on a story at the moment.")
+
+
+def handle_skip( contributor ):
+    """Handles the case of a user skipping a pormpt    
+    A skip, is a participant leaving a story
+    """
+    story_id = story_utilities.leaveStory( contributor )
+ 
+    if story_id:
+        # succesfully left story
+        dispatchers.sendBotMessage(contributor.social_identifier, "Ok, let's try again")
+        handle_join(contributor, ignore_story_ids=[story_id])
+    else:
+        # there was an issue leaving the story
+        dispatchers.sendBotMessage(contributor.social_identifier,  "It looks like you are not working on a story at the moment.")
 
 
 
 def handle_browse( contributor ):
     """Handle the case that the user is attempting to read a random story 
-    """    
+    """
     # get a random story
     story = Story.objects.filter(complete=True).order_by('?').first()
     if story:
@@ -235,9 +242,13 @@ def handle_help( contributor, detail_level=3 ):
 
 
 def handle_create( contributor):
+    """Handles the creation of an account.
+    Gets basic facebook user info and populates the contributor object
     """
-    """
-    fb_info = get_user_fb_info( contributor.social_identifier )            
+    # get the user's facebook info
+    fb_info = get_user_fb_info( contributor.social_identifier )
+
+    # populate the contributor object
     contributor.profile_pic = fb_info.get('profile_pic')
     contributor.first_name = fb_info.get('first_name')
     contributor.last_name = fb_info.get('last_name')
@@ -245,11 +256,9 @@ def handle_create( contributor):
     contributor.gender = fb_info.get('gender')
     contributor.timezone = fb_info.get('timezone')
     contributor.save()
-    
-    dispatchers.sendBotMessage(contributor.social_identifier, "Thanks for joining StoryBot!")
-    dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                    "Let's get started.",
-                                    [BUTTON_JOIN, BUTTON_BROWSE])
+
+    # send a cta    
+    dispatchers.ctaOnAccountCreation( contributor )
 
 
 """Define the bot action handlers to their mapped keywords
@@ -259,10 +268,12 @@ BOT_HANDLER_MAPPING = {
     KEYWORD_DONE: handle_done,
     KEYWORD_UNDO: handle_undo,
     KEYWORD_LEAVE: handle_leave,
+    KEYWORD_SKIP: handle_skip,
     KEYWORD_BROWSE: handle_browse,
     KEYWORD_HISTORY: handle_history,
     KEYWORD_HELP: handle_help,
-    KEYWORD_CREATE: handle_create
+    KEYWORD_CREATE: handle_create,
+    KEYWORD_OPTIONS: handle_options
 }
 
 def process_postback_message( contributor, payload ):
@@ -272,13 +283,10 @@ def process_postback_message( contributor, payload ):
     The payload should map directly to our keywords
     since we defined the values
     """
-    
     if hasNumber(payload):
         story_id = int(payload.split(' ')[1])
         BOT_HANDLER_MAPPING[ KEYWORD_READ ]( contributor, story_id )
     else:
-        print '*'*50
-        print payload
         BOT_HANDLER_MAPPING[ payload ]( contributor )
 
 def process_raw_message( contributor, payload ):
@@ -289,6 +297,7 @@ def process_raw_message( contributor, payload ):
     cases will be given higher precident
     """
     processed_payload = payload.lower()
+    
     if KEYWORD_HELP in processed_payload:
         BOT_HANDLER_MAPPING[KEYWORD_HELP]( contributor )
     elif KEYWORD_JOIN in processed_payload:
@@ -297,10 +306,12 @@ def process_raw_message( contributor, payload ):
         BOT_HANDLER_MAPPING[ KEYWORD_DONE ]( contributor ) 
     elif KEYWORD_LEAVE in processed_payload:
         BOT_HANDLER_MAPPING[KEYWORD_LEAVE]( contributor )
+    elif KEYWORD_SKIP in processed_payload:
+        BOT_HANDLER_MAPPING[KEYWORD_SKIP]( contributor )
     elif KEYWORD_HISTORY in processed_payload:
         BOT_HANDLER_MAPPING[KEYWORD_HISTORY]( contributor )
     elif KEYWORD_BROWSE in processed_payload:
-        BOT_HANDLER_MAPPING[KEYWORD_BROWSE]( contributor )
+        BOT_HANDLER_MAPPING[KEYWORD_BROWSE]( contributor )    
     else:
         if contributor.state == WRITING:
             fragment = story_utilities.updateStory( contributor, payload )
@@ -312,6 +323,7 @@ def process_raw_message( contributor, payload ):
             # we didn't understand the input so show user all
             # availible options
             BOT_HANDLER_MAPPING[KEYWORD_HELP]( contributor )
+
 
 def process_img_message( contributor, payload ):
     """In the event the user sends us some rich

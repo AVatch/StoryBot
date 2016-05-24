@@ -7,20 +7,19 @@ from django.conf import settings
 from .fb_chat_buttons import *
 from .keywords import *
 from .helpers import *
-from .models import Contributor, Story, Fragment
+from .models import Contributor, Story, Fragment, WRITING
 
+import content_generators
 
 FB_TOKEN = os.environ.get("FB_TOKEN")
 FB_URL = os.environ.get("FB_URL")
 FB_PAGE_ID = os.environ.get("FB_PAGE_ID")
 
-def sendBotMessage(recipient, message, first_person=False):
+
+
+def sendBotMessage(recipient, message):
     """A script to send a facebook message to recipient
     """
-    
-    if first_person:
-        message = "[StoryBot] " + message
-    
     responseBody = { 
                         'recipient': { 
                             'id': recipient
@@ -35,51 +34,6 @@ def sendBotMessage(recipient, message, first_person=False):
                       headers = {'content-type': 'application/json'},
                       data = json.dumps(responseBody) )
 
-def sendBotStructuredGenericMessage(recipient, title, item_url=None, image_url=None, subtitle=None, buttons=[]):
-    """ref: https://developers.facebook.com/docs/messenger-platform/send-api-reference#welcome_message_configuration
-            https://developers.facebook.com/docs/messenger-platform/send-api-reference#guidelines 
-    
-    Regarding buttons:
-        {
-            "type":"web_url",
-            "title":"View Website",
-            "url":"https://www.petersbowlerhats.com"
-        },
-        {
-            "type":"postback",
-            "title":"Start Chatting",
-            "payload":"DEVELOPER_DEFINED_PAYLOAD"
-        }
-    """
-    
-    responseBody = {
-        'recipient': { 
-            'id': recipient
-        },
-        "message": {
-            "attachment": {
-                "type": "template",
-                "payload": {
-                    "template_type": "generic",
-                    "elements": [
-                        {
-                            "title": title,
-                            "item_url": item_url,
-                            "image_url": image_url,
-                            "subtitle": subtitle,
-                            "buttons": buttons
-                        }
-                    ]
-                }
-            }
-        }
-         
-    }
-    
-    requests.post(FB_URL, 
-                  params = { 'access_token': FB_TOKEN },
-                  headers = {'content-type': 'application/json'},
-                  data = json.dumps(responseBody) )
 
 def sendBotStructuredImageMessage(recipient, img_url):
     """Send a facebook structured image message
@@ -247,3 +201,135 @@ def postStoryToFacebook( story ):
                       "message": "Hello world"
                   }) )
     print r.json()
+
+
+def notifyContributorOnTurn( contributor, story, short=True ):
+    """Send a notification to the user that it is their turn
+    """
+    n = story.calculate_remaining_number_of_turns( contributor )
+    msg = "It's your turn, you have %d turns left" % (n, )
+    buttons = [{
+                    "type": "web_url",
+                    "title": "Read the story",
+                    "url": settings.BASE_URL + "/stories/" + str(story.id)
+                },
+               BUTTON_OPTIONS]
+               
+    if short:
+        sendBotMessage(contributor.social_identifier, msg)
+    else:
+        sendBotStructuredButtonMessage(contributor.social_identifier, msg, buttons)
+
+
+"""
+Flare
+"""
+def flareOnSearch( contributor ):
+    """
+    """
+    print "flareOnSearch()"
+    img_url = content_generators.generate_search_img()
+    sendBotStructuredImageMessage( contributor.social_identifier, img_url)
+
+def flareOnRead( contributor ):
+    """
+    """
+    print "flareOnRead()"
+    img_url = content_generators.generate_read_img()
+    sendBotStructuredImageMessage( contributor.social_identifier, img_url)
+
+def flareOnDone( contributor ):
+    """
+    """
+    print "flareOnDone()"
+    img_url = content_generators.generate_done_img()
+    sendBotStructuredImageMessage( contributor.social_identifier, img_url)
+
+"""
+Call to Actions
+"""
+
+def ctaOnAccountCreation( contributor ):
+    """Call to Action on first time using the bot
+    """
+    print "ctaOnAccountCreation()"
+    sendBotMessage(contributor.social_identifier, "Thanks for joining StoryBot %s!" % contributor.first_name)
+    sendBotMessage(contributor.social_identifier, "Welcome! StoryBot is a writing game, where you get paired up with another random participant and take turns writing a story through messenger. We start you off with a writing prompt and will notify you every time it is your turn by sending you a friendly message.")
+    sendBotStructuredButtonMessage(contributor.social_identifier,
+                                    "Let's get started",
+                                    [BUTTON_JOIN, BUTTON_BROWSE])
+
+def ctaOptionsMenu( contributor ):
+    """Call to Action menu for general options
+    """
+    print "ctaOptionsMenu()"
+    msg = "What would you like to do?"
+    buttons = []
+    if contributor.state == WRITING:
+        buttons.append(BUTTON_LEAVE)
+    else:
+        buttons.append(BUTTON_JOIN)
+    buttons.append(BUTTON_READ)
+    buttons.append(BUTTON_HISTORY)
+    sendBotStructuredButtonMessage( contributor.social_identifier, msg, buttons )
+
+def ctaNewStoryOnCreation( contributor, story ):
+    """Call To Action for succesfully joining a story by being the first
+    """
+    print "ctaNewStoryOnCreation()"
+    n = story.calculate_remaining_number_of_turns( contributor )
+    prompt = story.prompt
+    alias = contributor.temp_alias
+    msg = "Here is a story for you to start off, you will have %d turns and be called \"%s\"! Here is the prompt: \"%s\"" % (n, alias, prompt,)
+    buttons = [{
+                    "type": "web_url",
+                    "title": "Read the story",
+                    "url": settings.BASE_URL + "/stories/" + str(story.id)
+                },
+               BUTTON_SKIP, BUTTON_OPTIONS]
+    sendBotStructuredButtonMessage( contributor.social_identifier, msg, buttons ) 
+
+def ctaNewStoryOnJoin( contributor, story ):
+    """Call to Action for succesfully joining a story that has already been started
+    """
+    print "ctaNewStoryOnJoin()"
+    n = story.calculate_remaining_number_of_turns( contributor )
+    alias = contributor.temp_alias
+    msg = "Here is a story for you to join, you will have %d turns and be called \"%s\"! I'll message you when it's your turn." % (n, alias, )
+    buttons = [{
+                    "type": "web_url",
+                    "title": "Read the story",
+                    "url": settings.BASE_URL + "/stories/" + str(story.id)
+                },
+               BUTTON_SKIP, BUTTON_OPTIONS]
+    sendBotStructuredButtonMessage( contributor.social_identifier, msg, buttons )
+
+def ctaNewStoryOnBusy( contributor, story ):
+    """Call To Action for not joining a story because the
+    contributor is already writing another story
+    """
+    print "ctaNewStoryOnBusy()"
+    msg = ""
+    buttons = []
+    
+    last_fragment = contributor.get_last_fragment()
+    
+    if last_fragment:
+        n = story.calculate_remaining_number_of_turns( contributor )
+        alias = contributor.temp_alias
+        msg += "Seems like you are already working on another story under the alias \"%s\" and have %d turns left. Finish or leave the story before starting a new one." % (alias, n)
+        buttons.append({
+                           "type": "web_url",
+                           "title": "Read the story",
+                           "url": settings.BASE_URL + "/stories/" + str(story.id)
+                        })
+        buttons.append(BUTTON_LEAVE)
+    else:
+        msg += "Something broke, sorry."
+    
+    buttons.append(BUTTON_OPTIONS)
+        
+    sendBotStructuredButtonMessage( contributor.social_identifier, msg, buttons )
+
+
+
