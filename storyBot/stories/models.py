@@ -228,10 +228,10 @@ class Story(models.Model):
 class Fragment(models.Model):
     story = models.ForeignKey(Story)
 
-    fragment = models.TextField(blank=True, max_length=1000)
+    fragment = models.TextField(blank=True, max_length=5000)
     position = models.IntegerField()
     
-    last_edit = models.TextField(blank=True, max_length=1000)
+    last_edit = models.TextField(blank=True, max_length=5000)
     complete = models.BooleanField(default=False)
 
     contributor = models.ForeignKey(Contributor, blank=True, null=True)
