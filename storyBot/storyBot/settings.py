@@ -29,9 +29,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ.get("SECRET_KEY") 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.thestorybot.com']
 
 
 # Application definition
@@ -99,11 +99,11 @@ DB_CONFIG_DEV = {
 }
 DB_CONFIG_PROD = {
     'ENGINE': 'django.db.backends.postgresql',
-    'NAME': os.environ.get("DB_DEV_NAME"),
-    'USER': os.environ.get("DB_DEV_USERNAME"),
-    'PASSWORD': os.environ.get("DB_DEV_PASSWORD"),
-    'HOST': os.environ.get("DB_DEV_HOST"),
-    'PORT': os.environ.get("DB_DEV_PORT"),
+    'NAME': os.environ.get("DB_PROD_NAME"),
+    'USER': os.environ.get("DB_PROD_USERNAME"),
+    'PASSWORD': os.environ.get("DB_PROD_PASSWORD"),
+    'HOST': os.environ.get("DB_PROD_HOST"),
+    'PORT': os.environ.get("DB_PROD_PORT"),
 }
 
 DB_CONFIG = DB_CONFIG_DEV if DEBUG else DB_CONFIG_PROD

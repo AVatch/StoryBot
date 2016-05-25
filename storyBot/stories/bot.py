@@ -111,11 +111,11 @@ def handle_done( contributor ):
                     dispatchers.notifyNextContributor( next_contributor, story )
                 else:
                     # the next fragment does not exist
-                    # print "no more fragments left"
+                    print "no more fragments left"
                 
             else:
                 # the next contributor is the current contributor
-                # print "cant find a next contributor whose id is not the current contributor"
+                print "cant find a next contributor whose id is not the current contributor"
     
     else:
         # fragment did not exist or was not written
