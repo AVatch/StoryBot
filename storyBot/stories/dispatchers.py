@@ -325,7 +325,7 @@ def ctaNewStoryOnCreation( contributor, story ):
                 },
                BUTTON_SKIP, BUTTON_OPTIONS]
     sendBotStructuredButtonMessage( contributor.social_identifier, msg, buttons )
-    sendBotMessage( contributor.social_identifier, ":|] Just message me and I'll add your message to the story! ) 
+    sendBotMessage( contributor.social_identifier, ":|] Just message me and I'll add your message to the story!" ) 
 
 def ctaNewStoryOnJoin( contributor, story ):
     """Call to Action for succesfully joining a story that has already been started
