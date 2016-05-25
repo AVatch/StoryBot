@@ -282,7 +282,10 @@ def process_raw_message( contributor, payload ):
     else:
         if contributor.state == WRITING:
             fragment = story_utilities.updateStory( contributor, payload )
-            dispatchers.ctaConfirmEdit( contributor )
+            if fragment:
+                dispatchers.ctaConfirmEdit( contributor )
+            else:
+                dispatchers.sendBotMessage(contributor.social_identifier, ":|] Sorry, I didn't get that, it may be too long try again!")
         else:
             # we didn't understand the input so show user all
             # availible options

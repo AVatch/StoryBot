@@ -76,11 +76,14 @@ def markFragmentAsDone(fragment):
 def updateStory(contributor, content):
     """Update the fragment
     """
-    print "updateStory()"
-    fragment = contributor.get_last_fragment()
-    if fragment and not fragment.complete:
-        fragment.edit(content)
-    return fragment
+    if len(content) > 5000:
+        return None
+    else:
+        print "updateStory()"
+        fragment = contributor.get_last_fragment()
+        if fragment and not fragment.complete:
+            fragment.edit(content)
+        return fragment
 
 def undoLastEdit(contributor):
     """Undo the last edit made by the person
