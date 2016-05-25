@@ -138,12 +138,12 @@ def handle_undo( contributor ):
                                                         "type": "web_url",
                                                         "title": "Read the story",
                                                         "url": settings.BASE_URL + "/stories/" + str(f.story.id)
-                                                    }])
+                                                    }, BUTTON_OPTIONS])
                                                    
     else:
             dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                    ":|] It doesn't look like you are writing anything at the moment",
-                                                   [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
+                                                   [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_OPTIONS])
 
 def handle_leave( contributor ):
     """Handle the case that the user is attempting to leave the story
@@ -188,7 +188,7 @@ def handle_browse( contributor ):
                                                             [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_OPTIONS])
     else:
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                            ":|] Well this is embarassing, we can't find any stories",
+                                                            ":|] Well this is embarassing, I can't find any stories",
                                                             [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_OPTIONS])
 def handle_history( contributor ):
     """Handle the case that the user is attempting to see a history of their writing 

@@ -215,7 +215,7 @@ def notifyOnStoryUpdate( story ):
     if last_complete_fragment:
         for contributor in contributors:
             if contributor == last_complete_fragment.contributor:
-                sendBotMessage(contributor.social_identifier, ":|] We will notify you when it is your turn again!" )
+                sendBotMessage(contributor.social_identifier, ":|] I'll notify you when it is your turn again!" )
             else:
                 sendBotMessage(contributor.social_identifier, ":|] Story Updated by " + last_complete_fragment.alias)
                 readBackFragment(contributor, last_complete_fragment)
@@ -287,7 +287,7 @@ def ctaOnAccountCreation( contributor ):
     sendBotMessage(contributor.social_identifier, ":|] Thanks for joining StoryBot %s!" % contributor.first_name)
     sendBotMessage(contributor.social_identifier, ":|] StoryBot is a writing game, where you get paired up with another random participant and take turns writing a story through messenger. We start you off with a writing prompt and will notify you every time it is your turn by sending you a friendly message.")
     sendBotStructuredButtonMessage(contributor.social_identifier,
-                                    "Let's get started",
+                                    ":|] Let's get started!",
                                     [BUTTON_JOIN, BUTTON_BROWSE])
 
 def ctaOptionsMenu( contributor ):
@@ -324,7 +324,8 @@ def ctaNewStoryOnCreation( contributor, story ):
                     "url": settings.BASE_URL + "/stories/" + str(story.id)
                 },
                BUTTON_SKIP, BUTTON_OPTIONS]
-    sendBotStructuredButtonMessage( contributor.social_identifier, msg, buttons ) 
+    sendBotStructuredButtonMessage( contributor.social_identifier, msg, buttons )
+    sendBotMessage( contributor.social_identifier, ":|] Just message me and I'll add your message to the story! ) 
 
 def ctaNewStoryOnJoin( contributor, story ):
     """Call to Action for succesfully joining a story that has already been started

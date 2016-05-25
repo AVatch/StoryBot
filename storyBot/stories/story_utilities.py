@@ -43,7 +43,7 @@ def leaveStory(contributor):
     """Have the user leave their active story
     """
     print "leaveStory()"
-    if contributor.active_story:
+    if contributor.active_story != 0:
         try:
             active_story = Story.objects.get(id=contributor.active_story)
         except Story.DoesNotExist:
