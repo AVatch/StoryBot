@@ -5,3 +5,4 @@ django-filter
 requests
 python-dotenv
 scrapy
+psycopg2

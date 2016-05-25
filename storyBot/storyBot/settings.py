@@ -84,12 +84,31 @@ WSGI_APPLICATION = 'storyBot.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+
+# DB_CONFIG_DEV = {
+#     'ENGINE': 'django.db.backends.sqlite3',
+#     'NAME': os.path.join(BASE_DIR, 'db.sqlite3')
+# }
+DB_CONFIG_DEV = {
+    'ENGINE': 'django.db.backends.postgresql',
+    'NAME': os.environ.get("DB_DEV_NAME"),
+    'USER': os.environ.get("DB_DEV_USERNAME"),
+    'PASSWORD': os.environ.get("DB_DEV_PASSWORD"),
+    'HOST': os.environ.get("DB_DEV_HOST"),
+    'PORT': os.environ.get("DB_DEV_PORT"),
 }
+DB_CONFIG_PROD = {
+    'ENGINE': 'django.db.backends.postgresql',
+    'NAME': os.environ.get("DB_DEV_NAME"),
+    'USER': os.environ.get("DB_DEV_USERNAME"),
+    'PASSWORD': os.environ.get("DB_DEV_PASSWORD"),
+    'HOST': os.environ.get("DB_DEV_HOST"),
+    'PORT': os.environ.get("DB_DEV_PORT"),
+}
+
+DB_CONFIG = DB_CONFIG_DEV if DEBUG else DB_CONFIG_PROD
+
+DATABASES = { 'default': DB_CONFIG }
 
 
 

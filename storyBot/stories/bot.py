@@ -189,7 +189,7 @@ def handle_browse( contributor ):
     else:
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                             ":|] Well this is embarassing, I can't find any stories",
-                                                            [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_OPTIONS])
+                                                            [BUTTON_JOIN, BUTTON_OPTIONS])
 def handle_history( contributor ):
     """Handle the case that the user is attempting to see a history of their writing 
     """

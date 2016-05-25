@@ -4,7 +4,7 @@
 *.pem
 
 connect.sh
-copy_db.sh
+clone_db.sh
 
 migrations/
 assets/
