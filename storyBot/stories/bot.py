@@ -177,6 +177,7 @@ def handle_skip( contributor ):
 def handle_browse( contributor ):
     """Handle the case that the user is attempting to read a random story 
     """
+    print "handle_browse()"
     # get a random story
     story = Story.objects.filter(complete=True).order_by('?').first()
     if story:
@@ -193,35 +194,15 @@ def handle_browse( contributor ):
 def handle_history( contributor ):
     """Handle the case that the user is attempting to see a history of their writing 
     """
-    dispatchers.sendBotMessage(contributor.social_identifier, ":|] Here is a history of your stories")
+    print "handle_history()"
+    dispatchers.readBackContributorHistory( contributor )    
 
-    stories = Story.objects.filter(contributors__in=[contributor])
-    
-    chunk_size = 3 # fb lets us put only 3 buttons at a time
-    story_chunks = [stories[i:i + chunk_size] for i in range(0, len(stories), chunk_size)]
-    
-    for i, story_chunk in enumerate(story_chunks):
-        buttons = []
-        for story in story_chunk:
-            buttons.append({
-                                "type": "web_url",
-                                "title": "Story " + str(story.id),
-                                "url": settings.BASE_URL + "/stories/" + str(story.id)
-                            })
-    
-        dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                "[" + str(i+1) + "/" + str(len(story_chunks)) +  "]",
-                                                buttons)
-        
-    dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                            ":|] What would you like to do now?",
-                                            [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_OPTIONS])
-    
 
 def handle_help( contributor, detail_level=3 ):
     """Send a message to the user with all availble options
     the bot supports.
     """
+    print "handle_help()"
     dispatchers.ctaOptionsMenu( contributor )
 
 
@@ -229,6 +210,7 @@ def handle_create( contributor):
     """Handles the creation of an account.
     Gets basic facebook user info and populates the contributor object
     """
+    print "handle_create()"
     # get the user's facebook info
     fb_info = get_user_fb_info( contributor.social_identifier )
 

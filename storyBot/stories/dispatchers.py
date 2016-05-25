@@ -150,6 +150,32 @@ def readBackStory( contributor, story ):
                                         "url": settings.BASE_URL + "/stories/" + str(story.id)
                                     }])
 
+def readBackContributorHistory( contributor ):
+    """
+    """
+    print "readBackContributorHistory()"
+    stories = Story.objects.filter(contributors__in=[contributor])
+    chunk_size = 3 #fb allows only 3 buttons at a time
+    story_chunks = [stories[i:i + chunk_size] for i in range(0, len(stories), chunk_size)]
+    
+    print story_chunks
+    
+    sendBotMessage( contributor.social_identifier, "Here is a history of your stories") 
+    for i, story_chunk in enumerate(story_chunks):
+        buttons = []
+        for story in story_chunk:
+            print story
+            msg = "[%d/%d]" % ( (i+1), len(story_chunks) )
+            buttons.append({
+                                "type": "web_url",
+                                "title": story.prompt[:15] + "...",
+                                "url": settings.BASE_URL + "/stories/" + str(story.id)
+                            })
+        sendBotStructuredButtonMessage(contributor.social_identifier, msg, buttons)
+    
+    msg = "What would you like to do?"
+    buttons = [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_OPTIONS]
+    sendBotStructuredButtonMessage(contributor.social_identifier, msg, buttons)
 
 """
 -----Notifications
