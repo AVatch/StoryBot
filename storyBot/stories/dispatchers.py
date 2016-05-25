@@ -99,21 +99,21 @@ def flareOnSearch( contributor ):
     """
     print "flareOnSearch()"
     img_url = content_generators.generate_search_img()
-    sendBotStructuredImageMessage( contributor.social_identifier, img_url)
+    # sendBotStructuredImageMessage( contributor.social_identifier, img_url)
 
 def flareOnRead( contributor ):
     """
     """
     print "flareOnRead()"
     img_url = content_generators.generate_read_img()
-    sendBotStructuredImageMessage( contributor.social_identifier, img_url)
+    # sendBotStructuredImageMessage( contributor.social_identifier, img_url)
 
 def flareOnDone( contributor ):
     """
     """
     print "flareOnDone()"
     img_url = content_generators.generate_done_img()
-    sendBotStructuredImageMessage( contributor.social_identifier, img_url)
+    # sendBotStructuredImageMessage( contributor.social_identifier, img_url)
     
 
 """
@@ -126,7 +126,7 @@ def readBackFragment( contributor, fragment ):
     print "readBackFragment()"
     if fragment:
         text = ""
-        text += fragment.fragment if fragment.fragment is not "" else "[Nothing has been written yet]" 
+        text += fragment.fragment if fragment.fragment is not "" else "[ Nothing has been written yet ]" 
         fragment_chunks = helpers.chunkString(text, 180)
         for chunk in fragment_chunks:
             sendBotMessage(contributor.social_identifier, "<(\") " + "\"" + chunk + "\"")
@@ -139,7 +139,7 @@ def readBackStory( contributor, story ):
     
     story_snippet = ""
     for f in story_fragments:
-        story_snippet += f.fragment if f.fragment is not "" else "[Nothing has been written yet]"
+        story_snippet += f.fragment if f.fragment is not "" else "[ Nothing has been written yet ]"
     
     story_snippet = "<(\") \"" + story_snippet[:100] + "...\""
     sendBotStructuredButtonMessage(contributor.social_identifier,
@@ -160,7 +160,7 @@ def readBackContributorHistory( contributor ):
     
     print story_chunks
     
-    sendBotMessage( contributor.social_identifier, "Here is a history of your stories") 
+    sendBotMessage( contributor.social_identifier, ":|] Here is a history of your stories") 
     for i, story_chunk in enumerate(story_chunks):
         buttons = []
         for story in story_chunk:
@@ -173,7 +173,7 @@ def readBackContributorHistory( contributor ):
                             })
         sendBotStructuredButtonMessage(contributor.social_identifier, msg, buttons)
     
-    msg = "What would you like to do?"
+    msg = ":|] What would you like to do now?"
     buttons = [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_OPTIONS]
     sendBotStructuredButtonMessage(contributor.social_identifier, msg, buttons)
 
@@ -225,7 +225,7 @@ def notifyNextContributor( contributor, story ):
     """
     print "notifyNextContributor()"
     n = story.calculate_remaining_number_of_turns( contributor )
-    msg = "It's your turn and you have %d turns left. (just send us a message and we'll add it to your story's part)" % n
+    msg = ":|] It's your turn and you have %d turns left. (just send us a message and we'll add it to your story's part)" % n
     buttons = [{
                     "type": "web_url",
                     "title": "Read the story",
@@ -263,7 +263,7 @@ def notifyContributorOnTurn( contributor, story, short=True ):
     """
     print "notifyContributorOnTurn()"
     n = story.calculate_remaining_number_of_turns( contributor )
-    msg = "It's your turn, you have %d turns left" % (n, )
+    msg = ":|] It's your turn, you have %d turns left" % (n, )
     buttons = [{
                     "type": "web_url",
                     "title": "Read the story",
@@ -284,8 +284,8 @@ def ctaOnAccountCreation( contributor ):
     """Call to Action on first time using the bot
     """
     print "ctaOnAccountCreation()"
-    sendBotMessage(contributor.social_identifier, "Thanks for joining StoryBot %s!" % contributor.first_name)
-    sendBotMessage(contributor.social_identifier, "StoryBot is a writing game, where you get paired up with another random participant and take turns writing a story through messenger. We start you off with a writing prompt and will notify you every time it is your turn by sending you a friendly message.")
+    sendBotMessage(contributor.social_identifier, ":|] Thanks for joining StoryBot %s!" % contributor.first_name)
+    sendBotMessage(contributor.social_identifier, ":|] StoryBot is a writing game, where you get paired up with another random participant and take turns writing a story through messenger. We start you off with a writing prompt and will notify you every time it is your turn by sending you a friendly message.")
     sendBotStructuredButtonMessage(contributor.social_identifier,
                                     "Let's get started",
                                     [BUTTON_JOIN, BUTTON_BROWSE])
@@ -294,7 +294,7 @@ def ctaOptionsMenu( contributor ):
     """Call to Action menu for general options
     """
     print "ctaOptionsMenu()"
-    msg = "What would you like to do?"
+    msg = ":|] What would you like to do now?"
     buttons = []
     if contributor.is_busy():
         buttons.append(BUTTON_LEAVE)
@@ -311,11 +311,11 @@ def ctaNewStoryOnCreation( contributor, story ):
     n = story.calculate_remaining_number_of_turns( contributor )
     prompt = story.prompt
     alias = contributor.temp_alias
-    msg = "Here is a story for you to start off, you will have %d turns and be called \"%s\"! Here is the prompt: \"%s\"" % (n, alias, prompt,)
+    msg = ":|] Here is a story for you to start off, you will have %d turns and be called \"%s\"! Here is the prompt: \"%s\"" % (n, alias, prompt,)
     if len(msg) > 300:
         # we should chunk it
         chunks = helpers.chunkString(msg, 300)
-        msg = "Ready?"
+        msg = ":|] Ready?"
         for chunk in chunks:
             sendBotMessage(contributor.social_identifier, chunk)
     buttons = [{
@@ -332,7 +332,7 @@ def ctaNewStoryOnJoin( contributor, story ):
     print "ctaNewStoryOnJoin()"
     n = story.calculate_remaining_number_of_turns( contributor )
     alias = contributor.temp_alias
-    msg = "Here is a story for you to join, you will have %d turns and be called \"%s\"! I'll message you when it's your turn." % (n, alias, )
+    msg = ":|] Here is a story for you to join, you will have %d turns and be called \"%s\"! I'll message you when it's your turn." % (n, alias, )
     if len(msg) > 300:
         # we should chunk it
         chunks = helpers.chunkString(msg, 300)
@@ -360,7 +360,7 @@ def ctaNewStoryOnBusy( contributor, story ):
     if last_fragment:
         n = story.calculate_remaining_number_of_turns( contributor )
         alias = contributor.temp_alias
-        msg += "Seems like you are already working on another story under the alias \"%s\" and have %d turns left. Finish or leave the story before starting a new one." % (alias, n)
+        msg += ":|] Seems like you are already working on another story under the alias \"%s\" and have %d turns left. Finish or leave the story before starting a new one." % (alias, n)
         buttons.append({
                            "type": "web_url",
                            "title": "Read the story",

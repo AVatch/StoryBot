@@ -58,7 +58,7 @@ def handle_join( contributor, ignore_story_ids=None ):
         if active_story:
             dispatchers.ctaNewStoryOnBusy( contributor, active_story )
         else:
-            dispatchers.sendBotMessage( contributor.social_identifier, "You broke me, sorry!" )
+            dispatchers.sendBotMessage( contributor.social_identifier, ":|] You broke me, sorry!" )
             dispatchers.ctaOptionsMenu( contributor )
         
     else:
@@ -155,7 +155,7 @@ def handle_leave( contributor ):
         dispatchers.ctaLeftStory( contributor )
     else:
         # there was an issue leaving the story
-        dispatchers.sendBotMessage( contributor.social_identifier,  "It looks like you are not working on a story at the moment." )
+        dispatchers.sendBotMessage( contributor.social_identifier,  ":|] It looks like you are not working on a story at the moment." )
         dispatchers.ctaOptionsMenu( contributor )
 
 def handle_skip( contributor ):
@@ -167,11 +167,11 @@ def handle_skip( contributor ):
  
     if story_id:
         # succesfully left story
-        dispatchers.sendBotMessage(contributor.social_identifier, "Ok, let's try again")
+        dispatchers.sendBotMessage(contributor.social_identifier, ":|] Ok, let's try again")
         handle_join(contributor, ignore_story_ids=[story_id])
     else:
         # there was an issue leaving the story
-        dispatchers.sendBotMessage( contributor.social_identifier,  "It looks like you are not working on a story at the moment." )
+        dispatchers.sendBotMessage( contributor.social_identifier,  ":|] It looks like you are not working on a story at the moment." )
         dispatchers.ctaOptionsMenu( contributor )
 
 def handle_browse( contributor ):
@@ -190,7 +190,6 @@ def handle_browse( contributor ):
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                             ":|] Well this is embarassing, we can't find any stories",
                                                             [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_OPTIONS])
-
 def handle_history( contributor ):
     """Handle the case that the user is attempting to see a history of their writing 
     """
