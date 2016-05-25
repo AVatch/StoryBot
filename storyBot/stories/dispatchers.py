@@ -259,7 +259,7 @@ def ctaOnAccountCreation( contributor ):
     """
     print "ctaOnAccountCreation()"
     sendBotMessage(contributor.social_identifier, "Thanks for joining StoryBot %s!" % contributor.first_name)
-    sendBotMessage(contributor.social_identifier, "Welcome! StoryBot is a writing game, where you get paired up with another random participant and take turns writing a story through messenger. We start you off with a writing prompt and will notify you every time it is your turn by sending you a friendly message.")
+    sendBotMessage(contributor.social_identifier, "StoryBot is a writing game, where you get paired up with another random participant and take turns writing a story through messenger. We start you off with a writing prompt and will notify you every time it is your turn by sending you a friendly message.")
     sendBotStructuredButtonMessage(contributor.social_identifier,
                                     "Let's get started",
                                     [BUTTON_JOIN, BUTTON_BROWSE])

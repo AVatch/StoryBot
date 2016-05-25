@@ -184,11 +184,11 @@ def handle_browse( contributor ):
         dispatchers.readBackStory( contributor, story )
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                             ":|] What would you like to do now?",
-                                                            [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
+                                                            [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_OPTIONS])
     else:
         dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                                             ":|] Well this is embarassing, we can't find any stories",
-                                                            [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
+                                                            [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_OPTIONS])
 
 def handle_history( contributor ):
     """Handle the case that the user is attempting to see a history of their writing 
@@ -215,16 +215,14 @@ def handle_history( contributor ):
         
     dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
                                             ":|] What would you like to do now?",
-                                            [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
+                                            [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_OPTIONS])
     
 
 def handle_help( contributor, detail_level=3 ):
     """Send a message to the user with all availble options
     the bot supports.
     """
-    dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                            ":|] Here are the basics",
-                                            [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
+    dispatchers.ctaOptionsMenu( contributor )
 
 
 def handle_create( contributor):
