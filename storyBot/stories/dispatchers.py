@@ -88,7 +88,7 @@ def sendBotStructuredButtonMessage(recipient, text, buttons=[]):
                   params = { 'access_token': FB_TOKEN },
                   headers = {'content-type': 'application/json'},
                   data = json.dumps(request_data) )    
-    print r.json()
+    # print r.json()
     
     
 """
