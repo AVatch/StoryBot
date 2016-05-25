@@ -36,13 +36,13 @@ def sendBotMessage(recipient, message):
                       params = { 'access_token': FB_TOKEN },
                       headers = {'content-type': 'application/json'},
                       data = json.dumps(request_data) )
-    print r.json()
+    # print r.json()
 
 def sendBotStructuredImageMessage(recipient, img_url):
     """Send a facebook structured image message
     Use this for prompts and navigation
     """
-    print "sendBotStructuredImageMessage()"
+    # print "sendBotStructuredImageMessage()"
     request_data = {
         'recipient': { 
             'id': recipient
@@ -61,13 +61,13 @@ def sendBotStructuredImageMessage(recipient, img_url):
                   params = { 'access_token': FB_TOKEN },
                   headers = {'content-type': 'application/json'},
                   data = json.dumps(request_data) )
-    print r.json()
+    # print r.json()
 
 def sendBotStructuredButtonMessage(recipient, text, buttons=[]):
     """Send a facebook structured button message
     Use this for prompts and navigation
     """
-    print "sendBotStructuredButtonMessage()"
+    # print "sendBotStructuredButtonMessage()"
     request_data = {
         'recipient': { 
             'id': recipient
@@ -88,7 +88,7 @@ def sendBotStructuredButtonMessage(recipient, text, buttons=[]):
                   params = { 'access_token': FB_TOKEN },
                   headers = {'content-type': 'application/json'},
                   data = json.dumps(request_data) )    
-    print r.json()
+    # print r.json()
     
     
 """
@@ -97,21 +97,21 @@ def sendBotStructuredButtonMessage(recipient, text, buttons=[]):
 def flareOnSearch( contributor ):
     """
     """
-    print "flareOnSearch()"
+    # print "flareOnSearch()"
     img_url = content_generators.generate_search_img()
     # sendBotStructuredImageMessage( contributor.social_identifier, img_url)
 
 def flareOnRead( contributor ):
     """
     """
-    print "flareOnRead()"
+    # print "flareOnRead()"
     img_url = content_generators.generate_read_img()
     # sendBotStructuredImageMessage( contributor.social_identifier, img_url)
 
 def flareOnDone( contributor ):
     """
     """
-    print "flareOnDone()"
+    # print "flareOnDone()"
     img_url = content_generators.generate_done_img()
     # sendBotStructuredImageMessage( contributor.social_identifier, img_url)
     
@@ -123,7 +123,7 @@ def flareOnDone( contributor ):
 def readBackFragment( contributor, fragment ):
     """read back a fragment and properly chunks it up where necessary
     """
-    print "readBackFragment()"
+    # print "readBackFragment()"
     if fragment:
         text = ""
         text += fragment.fragment if fragment.fragment is not "" else "[ Nothing has been written yet ]" 
@@ -134,7 +134,7 @@ def readBackFragment( contributor, fragment ):
 def readBackStory( contributor, story ):
     """Reads the story back and makes sure it chunks it appropriately
     """
-    print "readBackStory()"
+    # print "readBackStory()"
     story_fragments = Fragment.objects.filter(story=story).order_by('position')[:5]
     
     story_snippet = ""
@@ -153,18 +153,18 @@ def readBackStory( contributor, story ):
 def readBackContributorHistory( contributor ):
     """
     """
-    print "readBackContributorHistory()"
+    # print "readBackContributorHistory()"
     stories = Story.objects.filter(contributors__in=[contributor])
     chunk_size = 3 #fb allows only 3 buttons at a time
     story_chunks = [stories[i:i + chunk_size] for i in range(0, len(stories), chunk_size)]
     
-    print story_chunks
+    # print story_chunks
     
     sendBotMessage( contributor.social_identifier, ":|] Here is a history of your stories") 
     for i, story_chunk in enumerate(story_chunks):
         buttons = []
         for story in story_chunk:
-            print story
+            # print story
             msg = "[%d/%d]" % ( (i+1), len(story_chunks) )
             buttons.append({
                                 "type": "web_url",
@@ -185,7 +185,7 @@ def notifyOnStoryCompletion( story ):
     # we want to get the contributors from the fragments 
     # rather than the story since ppl may have left, and we want 
     # to notify them as well
-    print "notifyOnStoryCompletion()"
+    # print "notifyOnStoryCompletion()"
     contributors = []
     fragments = story.fragment_set.all().order_by('position')
     for fragment in fragments:
@@ -209,8 +209,9 @@ def notifyOnStoryCompletion( story ):
 def notifyOnStoryUpdate( story ):
     """notify everyone that the story was just updated
     """
-    print "notifyOnStoryUpdate()"
+    # print "notifyOnStoryUpdate()"
     contributors = story.contributors.all()
+    # print contributors
     last_complete_fragment = story.get_last_complete_fragment()
     if last_complete_fragment:
         for contributor in contributors:
@@ -223,7 +224,7 @@ def notifyOnStoryUpdate( story ):
 def notifyNextContributor( contributor, story ):
     """notify the next contributor its their turn
     """
-    print "notifyNextContributor()"
+    # print "notifyNextContributor()"
     n = story.calculate_remaining_number_of_turns( contributor )
     msg = ":|] It's your turn and you have %d turns left. (just send us a message and we'll add it to your story's part)" % n
     buttons = [{
@@ -237,7 +238,7 @@ def remindInactiveContributor( contributor ):
     """notifies a contributor who has been inactive for a while
     and gives them an opportunity to leave or finish their story
     """
-    print "remindInactiveContributor()"
+    # print "remindInactiveContributor()"
     last_fragment = contributor.get_last_fragment()
     last_story = last_fragment.story
     msg = ":|] Hey, it's still your turn! Don't keep the others waiting."
@@ -251,7 +252,7 @@ def remindInactiveContributor( contributor ):
 def notifyKickedContributor( contributor ):
     """notifies a contributor that they are dropped from the story
     """
-    print "notifyKickedContributor()"
+    # print "notifyKickedContributor()"
     msg = ":|] Hey, you've been inactive for too long, so we've removed you from the story. You still will be notified when the story is done!"
     buttons = [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY]
     sendBotStructuredButtonMessage(contributor.social_identifier,
@@ -261,7 +262,7 @@ def notifyKickedContributor( contributor ):
 def notifyContributorOnTurn( contributor, story, short=True ):
     """Send a notification to the user that it is their turn
     """
-    print "notifyContributorOnTurn()"
+    # print "notifyContributorOnTurn()"
     n = story.calculate_remaining_number_of_turns( contributor )
     msg = ":|] It's your turn, you have %d turns left" % (n, )
     buttons = [{
@@ -283,7 +284,7 @@ def notifyContributorOnTurn( contributor, story, short=True ):
 def ctaOnAccountCreation( contributor ):
     """Call to Action on first time using the bot
     """
-    print "ctaOnAccountCreation()"
+    # print "ctaOnAccountCreation()"
     sendBotMessage(contributor.social_identifier, ":|] Thanks for joining StoryBot %s!" % contributor.first_name)
     sendBotMessage(contributor.social_identifier, ":|] StoryBot is a writing game, where you get paired up with another random participant and take turns writing a story through messenger. We start you off with a writing prompt and will notify you every time it is your turn by sending you a friendly message.")
     sendBotStructuredButtonMessage(contributor.social_identifier,
@@ -293,7 +294,7 @@ def ctaOnAccountCreation( contributor ):
 def ctaOptionsMenu( contributor ):
     """Call to Action menu for general options
     """
-    print "ctaOptionsMenu()"
+    # print "ctaOptionsMenu()"
     msg = ":|] What would you like to do now?"
     buttons = []
     if contributor.is_busy():
@@ -307,7 +308,7 @@ def ctaOptionsMenu( contributor ):
 def ctaNewStoryOnCreation( contributor, story ):
     """Call To Action for succesfully joining a story by being the first
     """
-    print "ctaNewStoryOnCreation()"
+    # print "ctaNewStoryOnCreation()"
     n = story.calculate_remaining_number_of_turns( contributor )
     prompt = story.prompt
     alias = contributor.temp_alias
@@ -330,7 +331,7 @@ def ctaNewStoryOnCreation( contributor, story ):
 def ctaNewStoryOnJoin( contributor, story ):
     """Call to Action for succesfully joining a story that has already been started
     """
-    print "ctaNewStoryOnJoin()"
+    # print "ctaNewStoryOnJoin()"
     n = story.calculate_remaining_number_of_turns( contributor )
     alias = contributor.temp_alias
     msg = ":|] Here is a story for you to join, you will have %d turns and be called \"%s\"! I'll message you when it's your turn." % (n, alias, )
@@ -352,7 +353,7 @@ def ctaNewStoryOnBusy( contributor, story ):
     """Call To Action for not joining a story because the
     contributor is already writing another story
     """
-    print "ctaNewStoryOnBusy()"
+    # print "ctaNewStoryOnBusy()"
     msg = ""
     buttons = []
     
@@ -403,5 +404,5 @@ def postStoryToFacebook( story ):
                   data = json.dumps({
                       "message": "Hello world"
                   }) )
-    print r.json()
+    # print r.json()
 

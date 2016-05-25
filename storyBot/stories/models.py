@@ -44,7 +44,7 @@ class Contributor(models.Model):
     temp_alias = models.CharField(max_length=100, blank=True, null=True)
     last_active = models.DateTimeField(null=True, blank=True)
     stale = models.BooleanField(default=False)
-    active_story = models.IntegerField(blank=True, null=True)
+    active_story = models.IntegerField(default=0)
 
     time_created = models.DateTimeField(auto_now_add=True)
     time_modified = models.DateTimeField(auto_now=True)
@@ -166,6 +166,9 @@ class Story(models.Model):
     
     def associate_fragment_with_contributor(self, contributor):
         availible_story_fragments = self.fragment_set.filter(contributor__isnull=True).order_by('position')
+        
+        # print availible_story_fragments 
+        
         if availible_story_fragments:
             # update the next story fragment
             next_availible_story_fragment = availible_story_fragments.first()
@@ -189,11 +192,14 @@ class Story(models.Model):
     def get_next_contributor(self):
         last_complete_fragment = self.get_last_complete_fragment()
         story_contributors = self.contributors.all()
-        if last_complete_fragment:
-            last_contributor = last_complete_fragment.contributor
-            last_contributor_index = list(story_contributors).index(last_contributor)
-            next_contributor = story_contributors[ last_contributor_index + 1 ] if last_contributor_index + 1 < len(story_contributors) else story_contributors.first()
+        # print "STORY Cs: ", story_contributors
+        
+        if last_complete_fragment and story_contributors:
             
+            last_contributor = last_complete_fragment.contributor
+            # print "LAST: ", last_contributor
+            next_contributor = story_contributors.exclude(id=last_contributor.id).first()
+            # print "NEXT: ", next_contributor
             return next_contributor
         else:
             return None
@@ -222,10 +228,10 @@ class Story(models.Model):
 class Fragment(models.Model):
     story = models.ForeignKey(Story)
 
-    fragment = models.TextField(blank=True)
+    fragment = models.TextField(blank=True, max_length=1000)
     position = models.IntegerField()
     
-    last_edit = models.TextField(blank=True)
+    last_edit = models.TextField(blank=True, max_length=1000)
     complete = models.BooleanField(default=False)
 
     contributor = models.ForeignKey(Contributor, blank=True, null=True)

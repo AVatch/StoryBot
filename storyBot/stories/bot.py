@@ -83,19 +83,21 @@ def handle_join( contributor, ignore_story_ids=None ):
 def handle_done( contributor ):
     """handles the case when a user says they are done with their fragment
     """
-    print "handle_done()"
+    # print "handle_done()"
     # get the last fragment the user was working on
     fragment = contributor.get_last_fragment()
     if fragment and story_utilities.markFragmentAsDone( fragment ):
         # fragment is done
         story = fragment.story
-        
+        # print story
         if story.is_story_done():
+            # print "is done"
             # the story is done, mark it complete
             story.mark_complete()
             # update everyone that story is done
             dispatchers.notifyOnStoryCompletion(story)
         else:
+            # print "is not done" 
             # the story is not done, so update everyone about the latest update
             dispatchers.notifyOnStoryUpdate(story)
             # now figure out who the next person is
@@ -109,11 +111,11 @@ def handle_done( contributor ):
                     dispatchers.notifyNextContributor( next_contributor, story )
                 else:
                     # the next fragment does not exist
-                    pass
+                    # print "no more fragments left"
                 
             else:
                 # the next contributor is the current contributor
-                pass
+                # print "cant find a next contributor whose id is not the current contributor"
     
     else:
         # fragment did not exist or was not written
@@ -148,7 +150,7 @@ def handle_undo( contributor ):
 def handle_leave( contributor ):
     """Handle the case that the user is attempting to leave the story
     """
-    print "handle_leave()"
+    # print "handle_leave()"
     story = story_utilities.leaveStory( contributor )
     if story:
         # succesfully left story
@@ -162,7 +164,7 @@ def handle_skip( contributor ):
     """Handles the case of a user skipping a pormpt    
     A skip, is a participant leaving a story
     """
-    print "handle_skip()"
+    # print "handle_skip()"
     story_id = story_utilities.leaveStory( contributor )
  
     if story_id:
@@ -177,7 +179,7 @@ def handle_skip( contributor ):
 def handle_browse( contributor ):
     """Handle the case that the user is attempting to read a random story 
     """
-    print "handle_browse()"
+    # print "handle_browse()"
     # get a random story
     story = Story.objects.filter(complete=True).order_by('?').first()
     if story:
@@ -193,7 +195,7 @@ def handle_browse( contributor ):
 def handle_history( contributor ):
     """Handle the case that the user is attempting to see a history of their writing 
     """
-    print "handle_history()"
+    # print "handle_history()"
     dispatchers.readBackContributorHistory( contributor )    
 
 
@@ -201,7 +203,7 @@ def handle_help( contributor, detail_level=3 ):
     """Send a message to the user with all availble options
     the bot supports.
     """
-    print "handle_help()"
+    # print "handle_help()"
     dispatchers.ctaOptionsMenu( contributor )
 
 
@@ -209,7 +211,7 @@ def handle_create( contributor):
     """Handles the creation of an account.
     Gets basic facebook user info and populates the contributor object
     """
-    print "handle_create()"
+    # print "handle_create()"
     # get the user's facebook info
     fb_info = get_user_fb_info( contributor.social_identifier )
 
