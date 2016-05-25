@@ -43,7 +43,6 @@ def handle_options( contributor ):
 def handle_join( contributor, ignore_story_ids=None ):
     """Join a story
     """
-    
     # send some flare
     dispatchers.flareOnSearch( contributor )
     
@@ -52,14 +51,14 @@ def handle_join( contributor, ignore_story_ids=None ):
         finish or leave their current story before starting a new one
         """
         try:
-            active_story = Story.objects.get(id=contributor.active_story)
+            active_story = Story.objects.get( id=contributor.active_story )
         except Story.DoesNotExist:
             active_story = None
         
         if active_story:
             dispatchers.ctaNewStoryOnBusy( contributor, active_story )
         else:
-            dispatchers.sendBotMessage("You broke me, sorry!")
+            dispatchers.sendBotMessage( contributor.social_identifier, "You broke me, sorry!" )
             dispatchers.ctaOptionsMenu( contributor )
         
     else:
@@ -68,20 +67,11 @@ def handle_join( contributor, ignore_story_ids=None ):
         available_story = Story.objects.filter(complete=False) \
                                        .filter(full=False) \
                                        .exclude(contributors__in=[contributor])
-        
-        print available_story
-        
         if ignore_story_ids:
             available_story = available_story.exclude(id__in=ignore_story_ids)
-        
-        print ignore_story_ids
-        print available_story
-        
+
         # pick a random story from the set of stories
         available_story = available_story.order_by('?').first()
-        
-        
-        
         
         if available_story:
             # join the story
@@ -93,13 +83,13 @@ def handle_join( contributor, ignore_story_ids=None ):
 def handle_done( contributor ):
     """handles the case when a user says they are done with their fragment
     """
+    print "handle_done()"
     # get the last fragment the user was working on
     fragment = contributor.get_last_fragment()
-    
-    if story_utilities.markFragmentAsDone( fragment ):
+    if fragment and story_utilities.markFragmentAsDone( fragment ):
         # fragment is done
-        
         story = fragment.story
+        
         if story.is_story_done():
             # the story is done, mark it complete
             story.mark_complete()
@@ -108,30 +98,27 @@ def handle_done( contributor ):
         else:
             # the story is not done, so update everyone about the latest update
             dispatchers.notifyOnStoryUpdate(story)
-            # now figure out the next person who is up
+            # now figure out who the next person is
             next_contributor = story.get_next_contributor()
-            
+
             if next_contributor and next_contributor.id != contributor.id:
                 next_fragment = story.associate_fragment_with_contributor(next_contributor)
                 
                 if next_fragment:
                     # notify the next contributor it's their turn
-                    dispatchers.sendBotStructuredButtonMessage(next_contributor.social_identifier,
-                                                        ":|] It's your turn, you have " + str( story.calculate_remaining_number_of_turns( next_contributor ) ) + " turns left. (just send us a message and we'll add it to your story's part)",
-                                                        [{
-                                                            "type": "web_url",
-                                                            "title": "Read the story",
-                                                            "url": settings.BASE_URL + "/stories/" + str(story.id)
-                                                        }])
+                    dispatchers.notifyNextContributor( next_contributor, story )
                 else:
-                    print "FAILED TO CREATE NEXT FRAGMENT"
+                    # the next fragment does not exist
+                    pass
                 
             else:
-                print "FAILED TO GET THE NEXT CONTRIBUTOR"
+                # the next contributor is the current contributor
+                pass
     
     else:
         # fragment did not exist or was not written
-        dispatchers.sendBotMessage(contributor.social_identifier, ":|] Looks like you havn't written anything!")
+        dispatchers.sendBotMessage( contributor.social_identifier, ":|] Looks like you havn't written anything!" )
+        dispatchers.ctaOptionsMenu( contributor )
     
 
 def handle_undo( contributor ):
@@ -161,21 +148,21 @@ def handle_undo( contributor ):
 def handle_leave( contributor ):
     """Handle the case that the user is attempting to leave the story
     """
+    print "handle_leave()"
     story = story_utilities.leaveStory( contributor )
     if story:
         # succesfully left story
-        dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                   ":|] You've left the story. We'll keep your submitted work for this story and notify you when the story is complete",
-                                                   [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY])
+        dispatchers.ctaLeftStory( contributor )
     else:
         # there was an issue leaving the story
-        dispatchers.sendBotMessage(contributor.social_identifier,  "It looks like you are not working on a story at the moment.")
-
+        dispatchers.sendBotMessage( contributor.social_identifier,  "It looks like you are not working on a story at the moment." )
+        dispatchers.ctaOptionsMenu( contributor )
 
 def handle_skip( contributor ):
     """Handles the case of a user skipping a pormpt    
     A skip, is a participant leaving a story
     """
+    print "handle_skip()"
     story_id = story_utilities.leaveStory( contributor )
  
     if story_id:
@@ -184,9 +171,8 @@ def handle_skip( contributor ):
         handle_join(contributor, ignore_story_ids=[story_id])
     else:
         # there was an issue leaving the story
-        dispatchers.sendBotMessage(contributor.social_identifier,  "It looks like you are not working on a story at the moment.")
-
-
+        dispatchers.sendBotMessage( contributor.social_identifier,  "It looks like you are not working on a story at the moment." )
+        dispatchers.ctaOptionsMenu( contributor )
 
 def handle_browse( contributor ):
     """Handle the case that the user is attempting to read a random story 
@@ -315,10 +301,7 @@ def process_raw_message( contributor, payload ):
     else:
         if contributor.state == WRITING:
             fragment = story_utilities.updateStory( contributor, payload )
-            story = fragment.story
-            dispatchers.sendBotStructuredButtonMessage(contributor.social_identifier,
-                                                       ":|] Got it! You can tell me more or finish your turn.",
-                                                       [BUTTON_DONE, BUTTON_UNDO])
+            dispatchers.ctaConfirmEdit( contributor )
         else:
             # we didn't understand the input so show user all
             # availible options

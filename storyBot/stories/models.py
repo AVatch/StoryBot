@@ -92,7 +92,6 @@ class Contributor(models.Model):
         """
         last_fragment = self.get_last_fragment()
         if last_fragment:
-            last_story = last_fragment.story
             return (self.state is WRITING) or (not last_fragment.complete)
         else:
             return False

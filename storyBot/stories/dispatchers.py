@@ -6,10 +6,10 @@ from django.conf import settings
 
 from .fb_chat_buttons import *
 from .keywords import *
-from .helpers import *
 from .models import Contributor, Story, Fragment, WRITING
 
 import content_generators
+import helpers
 
 FB_TOKEN = os.environ.get("FB_TOKEN")
 FB_URL = os.environ.get("FB_URL")
@@ -17,10 +17,14 @@ FB_PAGE_ID = os.environ.get("FB_PAGE_ID")
 
 
 
+"""
+-----FaceBook Interface
+"""
+
 def sendBotMessage(recipient, message):
     """A script to send a facebook message to recipient
     """
-    responseBody = { 
+    request_data = { 
                         'recipient': { 
                             'id': recipient
                         }, 
@@ -32,14 +36,15 @@ def sendBotMessage(recipient, message):
     r = requests.post(FB_URL, 
                       params = { 'access_token': FB_TOKEN },
                       headers = {'content-type': 'application/json'},
-                      data = json.dumps(responseBody) )
-
+                      data = json.dumps(request_data) )
+    print r.json()
 
 def sendBotStructuredImageMessage(recipient, img_url):
     """Send a facebook structured image message
     Use this for prompts and navigation
     """
-    responseBody = {
+    print "sendBotStructuredImageMessage()"
+    request_data = {
         'recipient': { 
             'id': recipient
         },
@@ -56,13 +61,15 @@ def sendBotStructuredImageMessage(recipient, img_url):
     r = requests.post(FB_URL, 
                   params = { 'access_token': FB_TOKEN },
                   headers = {'content-type': 'application/json'},
-                  data = json.dumps(responseBody) )
-    
+                  data = json.dumps(request_data) )
+    print r.json()
+
 def sendBotStructuredButtonMessage(recipient, text, buttons=[]):
     """Send a facebook structured button message
     Use this for prompts and navigation
     """
-    responseBody = {
+    print "sendBotStructuredButtonMessage()"
+    request_data = {
         'recipient': { 
             'id': recipient
         },
@@ -75,154 +82,18 @@ def sendBotStructuredButtonMessage(recipient, text, buttons=[]):
                     "buttons":buttons
                 }
             }
-        }
-         
+        }     
     }
     
     r = requests.post(FB_URL, 
                   params = { 'access_token': FB_TOKEN },
                   headers = {'content-type': 'application/json'},
-                  data = json.dumps(responseBody) )
-
-def sendHelpMessage( contributor ):
-    """Sends a help message with the instructions on how to use the bot
-    """
-    sendBotMessage( contributor.social_identifier, "To read a random story just send \"\\browse\"" )
-    sendBotMessage( contributor.social_identifier, "to start a story just send \"\start\"" )
-    sendBotMessage( contributor.social_identifier, "to read the story you are working on just send \"\\read\"" )
-    sendBotMessage( contributor.social_identifier, "to continue a story just send \"\continue\"" )
-    sendBotMessage( contributor.social_identifier, "to see a history of your stories just send \"history\"" )
-    
-
-def readBackFragment( contributor, fragment ):
-    """read back a fragment and properly chunks it up where necessary
-    """
-    if fragment:
-        text = ""
-        text += fragment.fragment if fragment.fragment is not "" else "[Nothing has been written yet]" 
-        fragment_chunks = chunkString(text, 180)
-        for chunk in fragment_chunks:
-            sendBotMessage(contributor.social_identifier, "<(\") " + "\"" + chunk + "\"")
-
-def readBackStory( contributor, story ):
-    """Reads the story back and makes sure it chunks it appropriately
-    """
-
-    story_fragments = Fragment.objects.filter(story=story).order_by('position')[:5]
-    
-    story_snippet = ""
-    for f in story_fragments:
-        story_snippet += f.fragment if f.fragment is not "" else "[Nothing has been written yet]"
-    
-    story_snippet = "<(\") \"" + story_snippet[:100] + "...\""
-    sendBotStructuredButtonMessage(contributor.social_identifier,
-                                   story_snippet,
-                                   [{
-                                        "type": "web_url",
-                                        "title": "Read the story",
-                                        "url": settings.BASE_URL + "/stories/" + str(story.id)
-                                    }])
-
-def notifyOnStoryCompletion( story ):
-    # we want to get the contributors from the fragments 
-    # rather than the story since ppl may have left, and we want 
-    # to notify them as well
-    contributors = []
-    fragments = story.fragment_set.all().order_by('position')
-    for fragment in fragments:
-        if fragment.contributor not in contributors:
-            contributors.append(fragment.contributor)
-    
-    for contributor in contributors:
-        contributor.reset_temp_alias()
-        contributor.set_active_story(0)
-        sendBotStructuredButtonMessage(contributor.social_identifier,
-                                       ":|] Looks like one of your stories is complete!",
-                                       [{
-                                            "type": "web_url",
-                                            "title": "Read the story",
-                                            "url": settings.BASE_URL + "/stories/" + str(story.id)
-                                        }, 
-                                        BUTTON_JOIN, 
-                                        BUTTON_BROWSE])   
-    
-    # post to facebook as well
-    # TBD - update the fb token
-    # postStoryToFacebook( story ) 
-    
-
-def notifyOnStoryUpdate( story ):
-    """notify everyone that the story was just updated
-    """
-    contributors = story.contributors.all()
-    last_complete_fragment = story.get_last_complete_fragment()
-    if last_complete_fragment:
-        for contributor in contributors:
-            if contributor == last_complete_fragment.contributor:
-                sendBotMessage(contributor.social_identifier, ":|] We will notify you when it is your turn again!" )
-            else:
-                sendBotMessage(contributor.social_identifier, ":|] Story Updated by " + last_complete_fragment.alias)
-                readBackFragment(contributor, last_complete_fragment)
-        
-def remindInactiveContributor( contributor ):
-    """notifies a contributor who has been inactive for a while
-    and gives them an opportunity to leave or finish their story
-    """
-    last_fragment = contributor.get_last_fragment()
-    last_story = last_fragment.story
-    sendBotStructuredButtonMessage(contributor.social_identifier,
-                                       ":|] Hey, it's still your turn! Don't keep the others waiting.",
-                                       [{
-                                            "type": "web_url",
-                                            "title": "Read the story",
-                                            "url": settings.BASE_URL + "/stories/" + str(last_story.id)
-                                        },  
-                                        BUTTON_DONE,
-                                        BUTTON_LEAVE])
-
-def notifyKickedContributor( contributor ):
-    """notifies a contributor that they are dropped from the story
-    """
-    sendBotStructuredButtonMessage(contributor.social_identifier,
-                                       ":|] Hey, you've been inactive for too long, so we've removed you from the story. You still will be notified when the story is done!",
-                                       [BUTTON_JOIN,
-                                        BUTTON_READ,
-                                        BUTTON_HISTORY])        
-
-
-def postStoryToFacebook( story ):
-    """Posts story snippet to the facebook page
-    ref: https://developers.facebook.com/docs/graph-api/reference/v2.6/page/feed#publish
-    """
-    r = requests.post("https://graph.facebook.com/v2.6/" + FB_PAGE_ID + "/feed", 
-                  params = { 'access_token': FB_TOKEN },
-                  headers = {'content-type': 'application/json'},
-                  data = json.dumps({
-                      "message": "Hello world"
-                  }) )
+                  data = json.dumps(request_data) )    
     print r.json()
-
-
-def notifyContributorOnTurn( contributor, story, short=True ):
-    """Send a notification to the user that it is their turn
-    """
-    n = story.calculate_remaining_number_of_turns( contributor )
-    msg = "It's your turn, you have %d turns left" % (n, )
-    buttons = [{
-                    "type": "web_url",
-                    "title": "Read the story",
-                    "url": settings.BASE_URL + "/stories/" + str(story.id)
-                },
-               BUTTON_OPTIONS]
-               
-    if short:
-        sendBotMessage(contributor.social_identifier, msg)
-    else:
-        sendBotStructuredButtonMessage(contributor.social_identifier, msg, buttons)
-
-
+    
+    
 """
-Flare
+-----Flare
 """
 def flareOnSearch( contributor ):
     """
@@ -244,9 +115,144 @@ def flareOnDone( contributor ):
     print "flareOnDone()"
     img_url = content_generators.generate_done_img()
     sendBotStructuredImageMessage( contributor.social_identifier, img_url)
+    
 
 """
-Call to Actions
+-----Read Story
+"""
+
+def readBackFragment( contributor, fragment ):
+    """read back a fragment and properly chunks it up where necessary
+    """
+    print "readBackFragment()"
+    if fragment:
+        text = ""
+        text += fragment.fragment if fragment.fragment is not "" else "[Nothing has been written yet]" 
+        fragment_chunks = helpers.chunkString(text, 180)
+        for chunk in fragment_chunks:
+            sendBotMessage(contributor.social_identifier, "<(\") " + "\"" + chunk + "\"")
+
+def readBackStory( contributor, story ):
+    """Reads the story back and makes sure it chunks it appropriately
+    """
+    print "readBackStory()"
+    story_fragments = Fragment.objects.filter(story=story).order_by('position')[:5]
+    
+    story_snippet = ""
+    for f in story_fragments:
+        story_snippet += f.fragment if f.fragment is not "" else "[Nothing has been written yet]"
+    
+    story_snippet = "<(\") \"" + story_snippet[:100] + "...\""
+    sendBotStructuredButtonMessage(contributor.social_identifier,
+                                   story_snippet,
+                                   [{
+                                        "type": "web_url",
+                                        "title": "Read the story",
+                                        "url": settings.BASE_URL + "/stories/" + str(story.id)
+                                    }])
+
+
+"""
+-----Notifications
+"""
+
+def notifyOnStoryCompletion( story ):
+    # we want to get the contributors from the fragments 
+    # rather than the story since ppl may have left, and we want 
+    # to notify them as well
+    print "notifyOnStoryCompletion()"
+    contributors = []
+    fragments = story.fragment_set.all().order_by('position')
+    for fragment in fragments:
+        if fragment.contributor not in contributors:
+            contributors.append(fragment.contributor)
+    
+    for contributor in contributors:
+        contributor.reset_temp_alias()
+        contributor.set_active_story(0)
+        
+        msg = ":|] Looks like one of your stories is complete!"
+        buttons = [{
+                        "type": "web_url",
+                        "title": "Read the story",
+                        "url": settings.BASE_URL + "/stories/" + str(story.id)
+                    }, 
+                    BUTTON_JOIN, 
+                    BUTTON_BROWSE]
+        sendBotStructuredButtonMessage(contributor.social_identifier, msg, buttons)
+
+def notifyOnStoryUpdate( story ):
+    """notify everyone that the story was just updated
+    """
+    print "notifyOnStoryUpdate()"
+    contributors = story.contributors.all()
+    last_complete_fragment = story.get_last_complete_fragment()
+    if last_complete_fragment:
+        for contributor in contributors:
+            if contributor == last_complete_fragment.contributor:
+                sendBotMessage(contributor.social_identifier, ":|] We will notify you when it is your turn again!" )
+            else:
+                sendBotMessage(contributor.social_identifier, ":|] Story Updated by " + last_complete_fragment.alias)
+                readBackFragment(contributor, last_complete_fragment)
+
+def notifyNextContributor( contributor, story ):
+    """notify the next contributor its their turn
+    """
+    print "notifyNextContributor()"
+    n = story.calculate_remaining_number_of_turns( contributor )
+    msg = "It's your turn and you have %d turns left. (just send us a message and we'll add it to your story's part)" % n
+    buttons = [{
+                    "type": "web_url",
+                    "title": "Read the story",
+                    "url": settings.BASE_URL + "/stories/" + str(story.id)
+                }, BUTTON_OPTIONS] 
+    sendBotStructuredButtonMessage(next_contributor.social_identifier, msg, buttons)
+    
+def remindInactiveContributor( contributor ):
+    """notifies a contributor who has been inactive for a while
+    and gives them an opportunity to leave or finish their story
+    """
+    print "remindInactiveContributor()"
+    last_fragment = contributor.get_last_fragment()
+    last_story = last_fragment.story
+    msg = ":|] Hey, it's still your turn! Don't keep the others waiting."
+    buttons = [{
+                    "type": "web_url",
+                    "title": "Read the story",
+                    "url": settings.BASE_URL + "/stories/" + str(last_story.id)
+                }, BUTTON_DONE, BUTTON_OPTIONS]
+    sendBotStructuredButtonMessage(contributor.social_identifier, msg, buttons)
+
+def notifyKickedContributor( contributor ):
+    """notifies a contributor that they are dropped from the story
+    """
+    print "notifyKickedContributor()"
+    msg = ":|] Hey, you've been inactive for too long, so we've removed you from the story. You still will be notified when the story is done!"
+    buttons = [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY]
+    sendBotStructuredButtonMessage(contributor.social_identifier,
+                                       msg,
+                                       )        
+
+def notifyContributorOnTurn( contributor, story, short=True ):
+    """Send a notification to the user that it is their turn
+    """
+    print "notifyContributorOnTurn()"
+    n = story.calculate_remaining_number_of_turns( contributor )
+    msg = "It's your turn, you have %d turns left" % (n, )
+    buttons = [{
+                    "type": "web_url",
+                    "title": "Read the story",
+                    "url": settings.BASE_URL + "/stories/" + str(story.id)
+                },
+               BUTTON_OPTIONS]
+               
+    if short:
+        sendBotMessage(contributor.social_identifier, msg)
+    else:
+        sendBotStructuredButtonMessage(contributor.social_identifier, msg, buttons)
+
+"""
+-----Call to Actions
 """
 
 def ctaOnAccountCreation( contributor ):
@@ -269,7 +275,7 @@ def ctaOptionsMenu( contributor ):
         buttons.append(BUTTON_LEAVE)
     else:
         buttons.append(BUTTON_JOIN)
-    buttons.append(BUTTON_READ)
+    buttons.append(BUTTON_BROWSE)
     buttons.append(BUTTON_HISTORY)
     sendBotStructuredButtonMessage( contributor.social_identifier, msg, buttons )
 
@@ -281,6 +287,12 @@ def ctaNewStoryOnCreation( contributor, story ):
     prompt = story.prompt
     alias = contributor.temp_alias
     msg = "Here is a story for you to start off, you will have %d turns and be called \"%s\"! Here is the prompt: \"%s\"" % (n, alias, prompt,)
+    if len(msg) > 300:
+        # we should chunk it
+        chunks = helpers.chunkString(msg, 300)
+        msg = ""
+        for chunk in chunks:
+            sendBotMessage(contributor.social_identifier, chunk)
     buttons = [{
                     "type": "web_url",
                     "title": "Read the story",
@@ -296,6 +308,12 @@ def ctaNewStoryOnJoin( contributor, story ):
     n = story.calculate_remaining_number_of_turns( contributor )
     alias = contributor.temp_alias
     msg = "Here is a story for you to join, you will have %d turns and be called \"%s\"! I'll message you when it's your turn." % (n, alias, )
+    if len(msg) > 300:
+        # we should chunk it
+        chunks = helpers.chunkString(msg, 300)
+        msg = ""
+        for chunk in chunks:
+            sendBotMessage(contributor.social_identifier, chunk)
     buttons = [{
                     "type": "web_url",
                     "title": "Read the story",
@@ -331,5 +349,33 @@ def ctaNewStoryOnBusy( contributor, story ):
         
     sendBotStructuredButtonMessage( contributor.social_identifier, msg, buttons )
 
+def ctaLeftStory( contributor ):
+    """Call To Action for when a user leaves a story
+    """
+    msg = ":|] You've left the story. We'll keep your submitted work for this story and notify you when the story is complete"
+    buttons = [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY]    
+    sendBotStructuredButtonMessage( contributor.social_identifier, msg, buttons)
 
+def ctaConfirmEdit( contributor ):
+    """
+    """
+    msg = ":|] Got it! You can tell me more or finish your turn."
+    buttons = [BUTTON_DONE, BUTTON_UNDO, BUTTON_OPTIONS]
+    sendBotStructuredButtonMessage(contributor.social_identifier, msg, buttons)
+
+
+"""
+-----Other
+"""
+def postStoryToFacebook( story ):
+    """Posts story snippet to the facebook page
+    ref: https://developers.facebook.com/docs/graph-api/reference/v2.6/page/feed#publish
+    """
+    r = requests.post("https://graph.facebook.com/v2.6/" + FB_PAGE_ID + "/feed", 
+                  params = { 'access_token': FB_TOKEN },
+                  headers = {'content-type': 'application/json'},
+                  data = json.dumps({
+                      "message": "Hello world"
+                  }) )
+    print r.json()
 
