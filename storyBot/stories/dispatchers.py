@@ -16,7 +16,6 @@ FB_URL = os.environ.get("FB_URL")
 FB_PAGE_ID = os.environ.get("FB_PAGE_ID")
 
 
-
 """
 -----FaceBook Interface
 """
@@ -178,7 +177,7 @@ def notifyOnStoryCompletion( story ):
                         "url": settings.BASE_URL + "/stories/" + str(story.id)
                     }, 
                     BUTTON_JOIN, 
-                    BUTTON_BROWSE]
+                    BUTTON_OPTIONS]
         sendBotStructuredButtonMessage(contributor.social_identifier, msg, buttons)
 
 def notifyOnStoryUpdate( story ):
@@ -206,7 +205,7 @@ def notifyNextContributor( contributor, story ):
                     "title": "Read the story",
                     "url": settings.BASE_URL + "/stories/" + str(story.id)
                 }, BUTTON_OPTIONS] 
-    sendBotStructuredButtonMessage(next_contributor.social_identifier, msg, buttons)
+    sendBotStructuredButtonMessage(contributor.social_identifier, msg, buttons)
     
 def remindInactiveContributor( contributor ):
     """notifies a contributor who has been inactive for a while
@@ -271,7 +270,7 @@ def ctaOptionsMenu( contributor ):
     print "ctaOptionsMenu()"
     msg = "What would you like to do?"
     buttons = []
-    if contributor.state == WRITING:
+    if contributor.is_busy():
         buttons.append(BUTTON_LEAVE)
     else:
         buttons.append(BUTTON_JOIN)

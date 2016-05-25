@@ -90,11 +90,7 @@ class Contributor(models.Model):
         """determine if the contributor is currently writing or part of a story
         that is not done
         """
-        last_fragment = self.get_last_fragment()
-        if last_fragment:
-            return (self.state is WRITING) or (not last_fragment.complete)
-        else:
-            return False
+        return (self.state is WRITING) or (self.active_story != 0)
              
         
     def __str__(self):
@@ -216,13 +212,12 @@ class Story(models.Model):
         verbose_name_plural = "stories"
     
     def get_number_of_fragments(self):
-        return self.fragment_set.all().count()
+        return "%d/%d" % ( self.fragment_set.filter(complete=True).count(), self.fragment_set.all().count() ) 
     get_number_of_fragments.short_description = 'Number of Fragments'
     
     def get_number_of_contributors(self):
         return self.contributors.all().count()
     get_number_of_contributors.short_description = 'Number of Contributors'
-        
 
 class Fragment(models.Model):
     story = models.ForeignKey(Story)
