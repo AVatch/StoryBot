@@ -290,7 +290,7 @@ def ctaNewStoryOnCreation( contributor, story ):
     if len(msg) > 300:
         # we should chunk it
         chunks = helpers.chunkString(msg, 300)
-        msg = ""
+        msg = "Ready?"
         for chunk in chunks:
             sendBotMessage(contributor.social_identifier, chunk)
     buttons = [{
@@ -311,7 +311,7 @@ def ctaNewStoryOnJoin( contributor, story ):
     if len(msg) > 300:
         # we should chunk it
         chunks = helpers.chunkString(msg, 300)
-        msg = ""
+        msg = "Ready?"
         for chunk in chunks:
             sendBotMessage(contributor.social_identifier, chunk)
     buttons = [{
