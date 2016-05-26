@@ -12,8 +12,7 @@ class RedditWPSpider(CrawlSpider):
     
     rules = [
         # Traverse the in the /r/WritingPrompts subreddit.
-        Rule(LinkExtractor(
-        	allow=['/r/WritingPrompts/\?count=\d*&after=\w*']),
+        Rule(LinkExtractor(allow=['/r/WritingPrompts/\?count=\d*&after=\w*']),
         	callback='parse_prompt',
         	follow=True),
     ]

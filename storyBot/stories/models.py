@@ -166,9 +166,7 @@ class Story(models.Model):
     
     def associate_fragment_with_contributor(self, contributor):
         availible_story_fragments = self.fragment_set.filter(contributor__isnull=True).order_by('position')
-        
-        # print availible_story_fragments 
-        
+
         if availible_story_fragments:
             # update the next story fragment
             next_availible_story_fragment = availible_story_fragments.first()
