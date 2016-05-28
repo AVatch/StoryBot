@@ -45,7 +45,14 @@ def generate_random_gif():
 
 PLACEHOLDER_IMG = "http://placehold.it/350x150"
 def generate_search_img():
-    return PLACEHOLDER_IMG
+    options = [
+        "https://media.giphy.com/media/3oEjHKUfzCuFB7eIYE/giphy.gif",# blue
+        "https://media.giphy.com/media/l41YAr1UylnZqtyO4/giphy.gif", # green
+        "https://media.giphy.com/media/3oEjHGmKWXUMmDHRV6/giphy.gif",# purple
+        "https://media.giphy.com/media/l41YgKtSiuBjyBlII/giphy.gif", # red
+        "https://media.giphy.com/media/3oEjHDcq0pDj5P4kZW/giphy.gif" # yellow
+    ]
+    return return random.choice(options)
 
 def generate_read_img():
     return PLACEHOLDER_IMG

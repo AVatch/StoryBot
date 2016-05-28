@@ -169,12 +169,7 @@ designated by its id
 """
 class StoryDetailView(View):
     def get(self, request, pk):
-        
-        # Colors from colourlovers
-        # http://www.colourlovers.com/palette/1930/cheer_up_emo_kid
-        COLORS = ['#556270', '#4ECDC4', '#C7F464', '#FF6B6B', 
-                  '#BD1550', '#009989', '#EDB92E', '#00AAFF', 
-                  '#AA00FF', '#FF00AA', '#FFAA00', '#AAFF00']
+        COLORS = ['#10b5ff', '#42ad73', '#a58cff', '#ffef4a', '#dc5f5e'] 
         
         story = get_object_or_404(Story, pk=pk)
         

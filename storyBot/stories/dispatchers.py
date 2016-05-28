@@ -99,7 +99,7 @@ def flareOnSearch( contributor ):
     """
     # print "flareOnSearch()"
     img_url = content_generators.generate_search_img()
-    # sendBotStructuredImageMessage( contributor.social_identifier, img_url)
+    sendBotStructuredImageMessage( contributor.social_identifier, img_url)
 
 def flareOnRead( contributor ):
     """
@@ -232,6 +232,10 @@ def notifyNextContributor( contributor, story ):
                     "title": "Read the story",
                     "url": settings.BASE_URL + "/stories/" + str(story.id)
                 }, BUTTON_OPTIONS] 
+    # check if this is the last fragment
+    last = story.fragment_set.all().order_by('position').last() == contributor.get_last_fragment()           
+    if last:
+        msg += " This will be the end of the story!"
     sendBotStructuredButtonMessage(contributor.social_identifier, msg, buttons)
     
 def remindInactiveContributor( contributor ):
