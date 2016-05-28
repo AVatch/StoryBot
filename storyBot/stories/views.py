@@ -140,8 +140,12 @@ class HomePageView(View):
             context["fragments"] = Fragment.objects.filter(story=story).order_by('position')
             context["description"] = context["fragments"][0].fragment[:130] + "..." 
             
+            COLORS = ['#10b5ff', '#42ad73', '#a58cff', '#ffef4a', '#dc5f5e']
+            
             for contributor in story.contributors.all():
-                color = "#%06x" % random.randint(0, 0xFFFFFF)
+                color = random.choice(COLORS)
+                COLORS.remove(color) # to make sure we dont pick the same color twice
+            
                 context["contributors"][contributor.id] = {
                     "color": color,
                     "alias": ""
