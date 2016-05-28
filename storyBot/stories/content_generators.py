@@ -52,7 +52,7 @@ def generate_search_img():
         "https://media.giphy.com/media/l41YgKtSiuBjyBlII/giphy.gif", # red
         "https://media.giphy.com/media/3oEjHDcq0pDj5P4kZW/giphy.gif" # yellow
     ]
-    return return random.choice(options)
+    return random.choice(options)
 
 def generate_read_img():
     return PLACEHOLDER_IMG
