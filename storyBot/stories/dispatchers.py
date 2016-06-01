@@ -229,6 +229,11 @@ def notifyNextContributor( contributor, story ):
     # print "notifyNextContributor()"
     n = story.calculate_remaining_number_of_turns( contributor )
     msg = ":|] It's your turn and you have %d turns left. (just send us a message and we'll add it to your story's part)" % n
+    
+    last = story.fragment_set.all().order_by('position').last() == contributor.get_last_fragment()           
+    if last:
+        msg += " This will be the end of the story!"
+    
     buttons = [{
                     "type": "web_url",
                     "title": "Read the story",
@@ -317,6 +322,11 @@ def ctaNewStoryOnCreation( contributor, story ):
     prompt = story.prompt
     alias = contributor.temp_alias
     msg = ":|] Here is a story for you to start off, you will have %d turns and be called \"%s\"! Here is the prompt: \"%s\"" % (n, alias, prompt,)
+    
+    last = story.fragment_set.all().order_by('position').last() == contributor.get_last_fragment()           
+    if last:
+        msg += " This will be the end of the story!"
+    
     if len(msg) > 300:
         # we should chunk it
         chunks = helpers.chunkString(msg, 300)
@@ -339,6 +349,11 @@ def ctaNewStoryOnJoin( contributor, story ):
     n = story.calculate_remaining_number_of_turns( contributor )
     alias = contributor.temp_alias
     msg = ":|] Here is a story for you to join, you will have %d turns and be called \"%s\"! I'll message you when it's your turn." % (n, alias, )
+    
+    last = story.fragment_set.all().order_by('position').last() == contributor.get_last_fragment()           
+    if last:
+        msg += " This will be the end of the story!"
+    
     if len(msg) > 300:
         # we should chunk it
         chunks = helpers.chunkString(msg, 300)
