@@ -113,7 +113,7 @@ def flareOnDone( contributor ):
     """
     # print "flareOnDone()"
     img_url = content_generators.generate_done_img()
-    # sendBotStructuredImageMessage( contributor.social_identifier, img_url)
+    sendBotStructuredImageMessage( contributor.social_identifier, img_url)
     
 
 """
@@ -195,6 +195,8 @@ def notifyOnStoryCompletion( story ):
     for contributor in contributors:
         contributor.reset_temp_alias()
         contributor.set_active_story(0)
+        
+        flareOnDone( contributor )
         
         msg = ":|] Looks like one of your stories is complete!"
         buttons = [{

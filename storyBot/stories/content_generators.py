@@ -58,4 +58,11 @@ def generate_read_img():
     return PLACEHOLDER_IMG
     
 def generate_done_img():
-    return PLACEHOLDER_IMG
+    options = [
+        "https://media.giphy.com/media/3oEjI9tsMtzEPU5rS8/giphy.gif",# blue
+        "https://media.giphy.com/media/l41YkY1sqD4z7GRgc/giphy.gif", # green
+        "https://media.giphy.com/media/l41YqAhms22IKucog/giphy.gif", # purple
+        "https://media.giphy.com/media/l41YejvefEvwNA0uc/giphy.gif", # red
+        "https://media.giphy.com/media/3oEjHVBZS5ijxbKrjq/giphy.gif" # yellow
+    ]
+    return random.choice(options)
