@@ -260,10 +260,8 @@ def notifyKickedContributor( contributor ):
     """
     # print "notifyKickedContributor()"
     msg = ":|] Hey, you've been inactive for too long, so we've removed you from the story. You still will be notified when the story is done!"
-    buttons = [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_HISTORY]
-    sendBotStructuredButtonMessage(contributor.social_identifier,
-                                       msg,
-                                       )        
+    buttons = [BUTTON_JOIN, BUTTON_BROWSE, BUTTON_OPTIONS]
+    sendBotStructuredButtonMessage(contributor.social_identifier, msg, buttons)        
 
 def notifyContributorOnTurn( contributor, story, short=True ):
     """Send a notification to the user that it is their turn
