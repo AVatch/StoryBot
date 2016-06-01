@@ -6,7 +6,7 @@ from django.conf import settings
 
 from .fb_chat_buttons import *
 from .keywords import *
-from .models import Contributor, Story, Fragment, WRITING
+from .models import Contributor, Story, Fragment, WRITING, BROWSING
 
 import content_generators
 import helpers
@@ -195,6 +195,7 @@ def notifyOnStoryCompletion( story ):
     for contributor in story.contributors.all():
         contributor.reset_temp_alias()
         contributor.set_active_story(0)
+        contributor.update_state(BROWSING)
     
     for contributor in contributors:
         flareOnDone( contributor )

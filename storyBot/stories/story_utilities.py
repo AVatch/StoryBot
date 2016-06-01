@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 from .fb_chat_buttons import *
-from .models import Contributor, Story, Fragment, WRITING
+from .models import Contributor, Story, Fragment, WRITING, BROWSING
 
 import dispatchers
 import content_generators
@@ -69,6 +69,7 @@ def markFragmentAsDone(fragment):
 
     if fragment and fragment.fragment:
         fragment.mark_complete()
+        fragment.contributor.update_state(BROWSING)
         return True
     else:
         return None

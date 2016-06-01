@@ -243,7 +243,6 @@ class Fragment(models.Model):
         self.save()
         # update the contributor
         self.contributor.mark_active()
-        self.contributor.update_state(BROWSING)
 
     def edit(self, content):
         self.fragment = " ".join([self.fragment, content]).strip()
