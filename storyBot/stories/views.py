@@ -154,7 +154,7 @@ class HomePageView(View):
                     context["contributors"][contributor.id]["alias"] = fragment.alias
             
             for fragment in story.fragment_set.all():
-                if fragment.contributor.id not in context["contributors"]:
+                if fragment.contributor and fragment.contributor.id not in context["contributors"]:
                     color = random.choice(COLORS)
                     COLORS.remove(color) # to make sure we dont pick the same color twice
                     context["contributors"][fragment.contributor.id] = {
