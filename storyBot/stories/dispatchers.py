@@ -323,10 +323,6 @@ def ctaNewStoryOnCreation( contributor, story ):
     alias = contributor.temp_alias
     msg = ":|] Here is a story for you to start off, you will have %d turns and be called \"%s\"! Here is the prompt: \"%s\"" % (n, alias, prompt,)
     
-    last = story.fragment_set.all().order_by('position').last() == contributor.get_last_fragment()           
-    if last:
-        msg += " This will be the end of the story!"
-    
     if len(msg) > 300:
         # we should chunk it
         chunks = helpers.chunkString(msg, 300)
@@ -340,7 +336,11 @@ def ctaNewStoryOnCreation( contributor, story ):
                 },
                BUTTON_SKIP, BUTTON_OPTIONS]
     sendBotStructuredButtonMessage( contributor.social_identifier, msg, buttons )
-    sendBotMessage( contributor.social_identifier, ":|] Just message me and I'll add your message to the story!" ) 
+    if last:
+        msg = ":|] This will be the end of the story!"
+        sendBotMessage( contributor.social_identifier, msg )
+    sendBotMessage( contributor.social_identifier, ":|] Just message me and I'll add your message to the story!" )
+     
 
 def ctaNewStoryOnJoin( contributor, story ):
     """Call to Action for succesfully joining a story that has already been started
@@ -349,11 +349,7 @@ def ctaNewStoryOnJoin( contributor, story ):
     n = story.calculate_remaining_number_of_turns( contributor )
     alias = contributor.temp_alias
     msg = ":|] Here is a story for you to join, you will have %d turns and be called \"%s\"! I'll message you when it's your turn." % (n, alias, )
-    
-    last = story.fragment_set.all().order_by('position').last() == contributor.get_last_fragment()           
-    if last:
-        msg += " This will be the end of the story!"
-    
+
     if len(msg) > 300:
         # we should chunk it
         chunks = helpers.chunkString(msg, 300)
@@ -367,6 +363,12 @@ def ctaNewStoryOnJoin( contributor, story ):
                 },
                BUTTON_SKIP, BUTTON_OPTIONS]
     sendBotStructuredButtonMessage( contributor.social_identifier, msg, buttons )
+    
+    last = story.fragment_set.all().order_by('position').last() == contributor.get_last_fragment()           
+    if last:
+        msg = ":|] This will be the end of the story!"
+        sendBotMessage( contributor.social_identifier, msg )
+    
 
 def ctaNewStoryOnBusy( contributor, story ):
     """Call To Action for not joining a story because the
