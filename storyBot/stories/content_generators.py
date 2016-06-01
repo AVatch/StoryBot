@@ -49,8 +49,8 @@ def generate_search_img():
         "https://media.giphy.com/media/3oEjHKUfzCuFB7eIYE/giphy.gif",# blue
         "https://media.giphy.com/media/l41YAr1UylnZqtyO4/giphy.gif", # green
         "https://media.giphy.com/media/3oEjHGmKWXUMmDHRV6/giphy.gif",# purple
-        "https://media.giphy.com/media/l41YgKtSiuBjyBlII/giphy.gif", # red
-        "https://media.giphy.com/media/3oEjHDcq0pDj5P4kZW/giphy.gif" # yellow
+        "https://media.giphy.com/media/3oEjHPTBVbLAh8fkGs/giphy.gif", # red
+        "https://media.giphy.com/media/3oEjHDlpUmtDu7xy6s/giphy.gif" # yellow
     ]
     return random.choice(options)
 
