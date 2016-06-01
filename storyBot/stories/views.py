@@ -147,12 +147,20 @@ class HomePageView(View):
                 COLORS.remove(color) # to make sure we dont pick the same color twice
             
                 context["contributors"][contributor.id] = {
-                    "color": color,
-                    "alias": ""
+                    "color": color
                 }
                 fragment = story.fragment_set.filter(contributor=contributor).first()
                 if fragment:
                     context["contributors"][contributor.id]["alias"] = fragment.alias
+            
+            for fragment in story.fragment_set.all():
+                if fragment.contributor.id not in context["contributors"]:
+                    color = random.choice(COLORS)
+                    COLORS.remove(color) # to make sure we dont pick the same color twice
+                    context["contributors"][fragment.contributor.id] = {
+                        "color": color,
+                        "alias": fragment.alias
+                    }
             
         else:
             # DB is empty and there are no stories
@@ -197,15 +205,23 @@ class StoryDetailView(View):
             COLORS.remove(color) # to make sure we dont pick the same color twice
             
             context["contributors"][contributor.id] = {
-                "color": color,
-                "alias": ""
+                "color": color
             }
             fragment = story.fragment_set.filter(contributor=contributor).first()
+
             if fragment:
-                context["contributors"][contributor.id]["alias"] = fragment.alias
-    
+                context["contributors"][contributor.id]["alias"] = fragment.alias        
+        
+        for fragment in story.fragment_set.all():
+            if fragment.contributor.id not in context["contributors"]:
+                color = random.choice(COLORS)
+                COLORS.remove(color) # to make sure we dont pick the same color twice
             
-    
+                context["contributors"][fragment.contributor.id] = {
+                    "color": color,
+                    "alias": fragment.alias
+                }
+        
         return render(request, 'stories/stories.html', context)
 
 """Renders the about page
