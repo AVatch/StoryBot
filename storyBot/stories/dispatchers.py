@@ -192,12 +192,12 @@ def notifyOnStoryCompletion( story ):
         if fragment.contributor not in contributors:
             contributors.append(fragment.contributor)
     
-    for contributor in contributors:
+    for contributor in story.contributors.all():
         contributor.reset_temp_alias()
         contributor.set_active_story(0)
-        
+    
+    for contributor in contributors:
         flareOnDone( contributor )
-        
         msg = ":|] Looks like one of your stories is complete!"
         buttons = [{
                         "type": "web_url",
