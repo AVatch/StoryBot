@@ -140,7 +140,7 @@ class HomePageView(View):
             context["fragments"] = Fragment.objects.filter(story=story).order_by('position')
             context["description"] = context["fragments"][0].fragment[:130] + "..." 
             
-            COLORS = ['#10b5ff', '#42ad73', '#a58cff', '#e7bd25', '#b20808']
+            COLORS = ['#10b5ff', '#42ad73', '#a58cff', '#e7bd25', '#b20808', '#557277', '#1693A5', '#420943']
             
             for contributor in story.contributors.all():
                 color = random.choice(COLORS)
@@ -173,7 +173,7 @@ designated by its id
 """
 class StoryDetailView(View):
     def get(self, request, pk):
-        COLORS = ['#10b5ff', '#42ad73', '#a58cff', '#e7bd25', '#b20808'] 
+        COLORS = ['#10b5ff', '#42ad73', '#a58cff', '#e7bd25', '#b20808', '#557277', '#1693A5', '#420943']
         
         story = get_object_or_404(Story, pk=pk)
         
