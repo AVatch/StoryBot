@@ -81,7 +81,9 @@ class BotWebHookHandler(APIView):
             else:
                 """Handle any other type of messages
                 """
-                dispatchers.sendBotMessage(contributor.social_identifier, ":P")
+                # dispatchers.sendBotMessage(contributor.social_identifier, ":P")
+                pass
+                
 
         """Return a 200 to the messenger provider 
         """
